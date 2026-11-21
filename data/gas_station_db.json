@@ -1,0 +1,408 @@
+{
+  "station": {
+    "name": "Al-Barakah Modern LPG Gas Station",
+    "tagline": "Safe, Fast & Accurate Digital Cooking Gas Refilling",
+    "address": "Plot 14, Commercial Avenue, Bypass Road",
+    "city": "Kano / Abuja",
+    "country": "Nigeria",
+    "phone": "+234 803 123 4567",
+    "email": "contact@albarakah-lpg.ng",
+    "rcNumber": "RC: 1849204",
+    "vatRate": 0
+  },
+  "settings": {
+    "pricePerKg": 1100,
+    "minRefillKg": 0.5,
+    "minRefillAmount": 500,
+    "currency": "₦",
+    "currencyCode": "NGN",
+    "receiptCopies": 2,
+    "requireCustomerPhone": false,
+    "pumps": [
+      "Pump 1 (North Island)",
+      "Pump 2 (South Island)"
+    ]
+  },
+  "tank": {
+    "tankId": "TANK-01",
+    "name": "Bulk LPG Skid Tank 1",
+    "capacityKg": 5000,
+    "currentStockKg": 3808.5,
+    "lowStockThresholdKg": 800,
+    "maxSafeFillPercent": 85,
+    "lastDeliveryDate": "2026-11-18T20:37:12.306Z"
+  },
+  "attendants": [
+    {
+      "id": "att-1",
+      "name": "Ibrahim Musa",
+      "code": "IM-01",
+      "pump": "Pump 1 (North Island)",
+      "active": true,
+      "phone": "08011223344"
+    },
+    {
+      "id": "att-2",
+      "name": "Usman Danladi",
+      "code": "UD-02",
+      "pump": "Pump 2 (South Island)",
+      "active": true,
+      "phone": "08055667788"
+    },
+    {
+      "id": "att-3",
+      "name": "Sani Bello",
+      "code": "SB-03",
+      "pump": "Standby / Relief",
+      "active": true,
+      "phone": "08099887766"
+    }
+  ],
+  "cashiers": [
+    {
+      "id": "csh-1",
+      "name": "Fatima Adamu",
+      "code": "FA-01",
+      "role": "Cashier",
+      "active": true
+    },
+    {
+      "id": "csh-2",
+      "name": "Ahmed Yahaya",
+      "code": "AY-02",
+      "role": "Manager / Admin",
+      "active": true
+    }
+  ],
+  "activeShift": {
+    "id": "SHIFT-20261121-01",
+    "cashierId": "csh-1",
+    "cashierName": "Fatima Adamu",
+    "startTime": "2026-11-21T16:37:12.308Z",
+    "openingCash": 25000,
+    "status": "OPEN"
+  },
+  "shiftHistory": [],
+  "orders": [
+    {
+      "id": "ORD-1001",
+      "orderNumber": "GF-20261121-0001",
+      "tokenCode": "TKN-314",
+      "customerName": "Alhaji Garba",
+      "customerPhone": "08034567890",
+      "cylinderType": "12.5kg",
+      "kgRequested": 12.5,
+      "ratePerKg": 1250,
+      "totalAmount": 15625,
+      "paymentMethod": "CASH",
+      "paymentRef": "CASH-COUNTER",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Ibrahim Musa",
+      "pump": "Pump 1 (North Island)",
+      "status": "COMPLETED",
+      "createdAt": "2026-11-21T17:37:12.308Z",
+      "completedAt": "2026-11-21T17:43:12.308Z"
+    },
+    {
+      "id": "ORD-1002",
+      "orderNumber": "GF-20261121-0002",
+      "tokenCode": "TKN-315",
+      "customerName": "Madam Ngozi",
+      "customerPhone": "08023456789",
+      "cylinderType": "6kg",
+      "kgRequested": 6,
+      "ratePerKg": 1250,
+      "totalAmount": 7500,
+      "paymentMethod": "POS_CARD",
+      "paymentRef": "POS-MONIEPOINT-881",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Usman Danladi",
+      "pump": "Pump 2 (South Island)",
+      "status": "COMPLETED",
+      "createdAt": "2026-11-21T18:07:12.308Z",
+      "completedAt": "2026-11-21T18:13:12.308Z"
+    },
+    {
+      "id": "ORD-1003",
+      "orderNumber": "GF-20261121-0003",
+      "tokenCode": "TKN-316",
+      "customerName": "Mallam Kabir",
+      "customerPhone": "08109876543",
+      "cylinderType": "Custom (₦5,000)",
+      "kgRequested": 4,
+      "ratePerKg": 1250,
+      "totalAmount": 5000,
+      "paymentMethod": "BANK_TRANSFER",
+      "paymentRef": "OPAY-TRF-9921",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Ibrahim Musa",
+      "pump": "Pump 1 (North Island)",
+      "status": "COMPLETED",
+      "createdAt": "2026-11-21T19:25:12.308Z",
+      "completedAt": "2026-11-21T19:31:12.308Z"
+    },
+    {
+      "id": "ORD-1004",
+      "orderNumber": "GF-20261121-0004",
+      "tokenCode": "TKN-317",
+      "customerName": "Mrs. Kemi Johnson",
+      "customerPhone": "08077889900",
+      "cylinderType": "25kg",
+      "kgRequested": 25,
+      "ratePerKg": 1250,
+      "totalAmount": 31250,
+      "paymentMethod": "POS_CARD",
+      "paymentRef": "POS-STANBIC-441",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Usman Danladi",
+      "pump": "Pump 2 (South Island)",
+      "status": "COMPLETED",
+      "createdAt": "2026-11-21T20:07:12.309Z",
+      "completedAt": "2026-11-21T20:13:12.309Z"
+    },
+    {
+      "id": "ORD-1795293717723",
+      "orderNumber": "GF-20261121-2267",
+      "tokenCode": "TKN-T337",
+      "customerName": "Alhaji Bello",
+      "customerPhone": "N/A",
+      "cylinderType": "12.5kg Household",
+      "kgRequested": 12.5,
+      "ratePerKg": 1250,
+      "totalAmount": 15625,
+      "paymentMethod": "CASH",
+      "paymentRef": "CASH-PAID",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Ibrahim Musa",
+      "pump": "Pump 1 (North Island)",
+      "status": "COMPLETED",
+      "createdAt": "2026-11-21T20:41:57.724Z",
+      "completedAt": "2026-11-21T20:51:11.979Z"
+    },
+    {
+      "id": "ORD-1795293864157",
+      "orderNumber": "GF-20261121-2663",
+      "tokenCode": "TKN-K275",
+      "customerName": "Walk-in Customer",
+      "customerPhone": "N/A",
+      "cylinderType": "12.5kg Household Cylinder",
+      "kgRequested": 12.5,
+      "ratePerKg": 1250,
+      "totalAmount": 15625,
+      "paymentMethod": "CASH",
+      "paymentRef": "CASH-COUNTER",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Ibrahim Musa",
+      "pump": "Pump 1 (North Island)",
+      "status": "COMPLETED",
+      "createdAt": "2026-11-21T20:44:24.157Z",
+      "completedAt": "2026-11-21T20:50:58.884Z"
+    },
+    {
+      "id": "ORD-1795295519151",
+      "orderNumber": "GF-20261121-4668",
+      "tokenCode": "TKN-Z376",
+      "customerName": "Walk-in Household",
+      "customerPhone": "N/A",
+      "cylinderType": "6kg Cylinder",
+      "kgRequested": 6,
+      "ratePerKg": 1250,
+      "totalAmount": 7500,
+      "paymentMethod": "POS_CARD",
+      "paymentRef": "POS-APPROVED",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Island Attendant",
+      "pump": "Pump 1 (North Island)",
+      "status": "PAID",
+      "createdAt": "2026-11-21T21:11:59.151Z",
+      "completedAt": null
+    },
+    {
+      "id": "ORD-1795295937196",
+      "orderNumber": "GF-20261121-8296",
+      "tokenCode": "TKN-J947",
+      "customerName": "Walk-in Household",
+      "customerPhone": "N/A",
+      "cylinderType": "₦6,250 Gas Refill",
+      "kgRequested": 5,
+      "ratePerKg": 1250,
+      "totalAmount": 6250,
+      "paymentMethod": "BANK_TRANSFER",
+      "paymentRef": "TRANSFER-CONFIRMED",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Island Attendant",
+      "pump": "Pump 1 (North Island)",
+      "status": "PAID",
+      "createdAt": "2026-11-21T21:18:57.196Z",
+      "completedAt": null
+    },
+    {
+      "id": "ORD-1795296045567",
+      "orderNumber": "GF-20261121-4887",
+      "tokenCode": "TKN-M154",
+      "customerName": "Walk-in Household",
+      "customerPhone": "N/A",
+      "cylinderType": "3kg Cylinder",
+      "kgRequested": 3,
+      "ratePerKg": 1250,
+      "totalAmount": 3750,
+      "paymentMethod": "BANK_TRANSFER",
+      "paymentRef": "TRANSFER-CONFIRMED",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Island Attendant",
+      "pump": "Pump 1 (North Island)",
+      "status": "PAID",
+      "createdAt": "2026-11-21T21:20:45.567Z",
+      "completedAt": null
+    },
+    {
+      "id": "ORD-1795298249946",
+      "orderNumber": "GF-20261121-2289",
+      "tokenCode": "TKN-Q558",
+      "customerName": "Walk-in Household",
+      "customerPhone": "N/A",
+      "cylinderType": "3kg Cylinder",
+      "kgRequested": 3,
+      "ratePerKg": 1100,
+      "totalAmount": 3300,
+      "paymentMethod": "POS_CARD",
+      "paymentRef": "POS-APPROVED",
+      "cashierName": "Fatima Adamu",
+      "attendantName": "Island Attendant",
+      "pump": "Pump 1 (North Island)",
+      "status": "PAID",
+      "createdAt": "2026-11-21T21:57:29.947Z",
+      "completedAt": null
+    }
+  ],
+  "tankDeliveries": [
+    {
+      "id": "DEL-001",
+      "date": "2026-11-16T20:37:12.309Z",
+      "supplier": "NNPC / Matrix Energy Ltd",
+      "truckNumber": "KMC-492-XA",
+      "waybillNumber": "WB-994821",
+      "metricTons": 3.5,
+      "kgReceived": 3500,
+      "costPerKg": 1020,
+      "totalCost": 3570000,
+      "offloadedBy": "Usman Danladi",
+      "notes": "Bridger tanker offloaded safely. Initial tank gauge 8%, final 78%."
+    }
+  ],
+  "tankDips": [
+    {
+      "id": "DIP-001",
+      "timestamp": "2026-11-21T08:37:12.309Z",
+      "gaugePercent": 77.5,
+      "calculatedStockKg": 3875,
+      "systemStockKg": 3898,
+      "varianceKg": -23,
+      "recordedBy": "Ahmed Yahaya",
+      "notes": "Morning opening calibration check."
+    }
+  ],
+  "users": [
+    {
+      "id": "usr-1",
+      "name": "Ahmed Yahaya",
+      "username": "admin",
+      "password": "123",
+      "role": "Manager / Owner",
+      "phone": "08031234567",
+      "createdAt": "2026-11-21T21:55:47.597Z"
+    },
+    {
+      "id": "usr-2",
+      "name": "Fatima Adamu",
+      "username": "fatima",
+      "password": "123",
+      "role": "Cashier (Morning Shift)",
+      "phone": "08023456789",
+      "createdAt": "2026-11-21T21:55:47.597Z"
+    },
+    {
+      "id": "usr-3",
+      "name": "Musa Ibrahim",
+      "username": "musa",
+      "password": "123",
+      "role": "Cashier (Evening Shift)",
+      "phone": "08099887766",
+      "createdAt": "2026-11-21T21:55:47.597Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "LOG-1795298345960-278",
+      "timestamp": "2026-11-21T21:59:05.960Z",
+      "userName": "Musa Ibrahim",
+      "role": "Cashier (Evening Shift)",
+      "action": "USER_LOGIN",
+      "details": "Musa Ibrahim (Cashier (Evening Shift)) logged in for duty/shift."
+    },
+    {
+      "id": "LOG-1795298343534-798",
+      "timestamp": "2026-11-21T21:59:03.534Z",
+      "userName": "Ahmed Yahaya",
+      "role": "Manager / Owner",
+      "action": "USER_LOGOUT",
+      "details": "Ahmed Yahaya (Manager / Owner) signed out / handed over shift."
+    },
+    {
+      "id": "LOG-1795298304127-982",
+      "timestamp": "2026-11-21T21:58:24.127Z",
+      "userName": "Ahmed Yahaya",
+      "role": "Manager / Owner",
+      "action": "USER_LOGIN",
+      "details": "Ahmed Yahaya (Manager / Owner) logged in for duty/shift."
+    },
+    {
+      "id": "LOG-1795298299187-811",
+      "timestamp": "2026-11-21T21:58:19.187Z",
+      "userName": "Fatima Adamu",
+      "role": "Cashier (Morning Shift)",
+      "action": "USER_LOGOUT",
+      "details": "Fatima Adamu (Cashier (Morning Shift)) signed out / handed over shift."
+    },
+    {
+      "id": "LOG-1795298250988-939",
+      "timestamp": "2026-11-21T21:57:30.988Z",
+      "userName": "Fatima Adamu",
+      "role": "Cashier (Morning Shift)",
+      "action": "SALE_COMPLETED",
+      "details": "Fatima Adamu completed 3 KG refill sale for ₦3,300 via POS_CARD. (Token: TKN-Q558)"
+    },
+    {
+      "id": "LOG-1795298223982-192",
+      "timestamp": "2026-11-21T21:57:03.982Z",
+      "userName": "Fatima Adamu",
+      "role": "Cashier (Morning Shift)",
+      "action": "USER_LOGIN",
+      "details": "Fatima Adamu (Cashier (Morning Shift)) logged in for duty/shift."
+    },
+    {
+      "id": "LOG-1795298147730-267",
+      "timestamp": "2026-11-21T21:55:47.734Z",
+      "userName": "Fatima Adamu",
+      "role": "Cashier (Morning Shift)",
+      "action": "USER_LOGIN",
+      "details": "Fatima Adamu (Cashier (Morning Shift)) logged in for duty/shift."
+    },
+    {
+      "id": "LOG-INIT-1",
+      "timestamp": "2026-11-21T17:55:47.597Z",
+      "userName": "Fatima Adamu",
+      "role": "Cashier (Morning Shift)",
+      "action": "USER_LOGIN",
+      "details": "Fatima Adamu logged in to start morning cashier shift."
+    },
+    {
+      "id": "LOG-INIT-2",
+      "timestamp": "2026-11-21T18:25:47.597Z",
+      "userName": "Ahmed Yahaya",
+      "role": "Manager / Owner",
+      "action": "PRICE_CHANGED",
+      "details": "Ahmed Yahaya verified and set gas rate at ₦1,250/kg."
+    }
+  ]
+}

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gas Station POS & Inventory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-orange-500 selection:text-white">
+
+  <!-- ================= AUTH OVERLAY (LOGIN / REGISTER) ================= -->
+  <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+      
+      <!-- Brand Header -->
+      <div class="text-center space-y-1 pb-2 border-b border-slate-800">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/20 mb-2">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+          </svg>
+        </div>
+        <h2 id="auth-title" class="text-xl font-black text-white">Staff / Worker Login</h2>
+        <p id="auth-subtitle" class="text-xs text-slate-400">Sign in to start your shift at the cashier station</p>
+      </div>
+
+      <!-- Quick Switch Between Login and Register -->
+      <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs font-bold">
+        <button type="button" onclick="setAuthMode('login')" id="btn-tab-login" class="py-2 rounded-lg bg-orange-500 text-white shadow">Sign In</button>
+        <button type="button" onclick="setAuthMode('register')" id="btn-tab-register" class="py-2 rounded-lg text-slate-400 hover:text-white">Register Worker</button>
+      </div>
+
+      <!-- FORM: LOGIN -->
+      <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Username:</label>
+          <input type="text" id="login-username" required placeholder="e.g. fatima or admin" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Password / PIN:</label>
+          <input type="password" id="login-password" required placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 font-mono">
+        </div>
+
+        <div id="login-error" class="hidden p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 font-medium"></div>
+
+        <button type="submit" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-slate-950 shadow-lg shadow-orange-500/25 transition active:scale-[0.98]">
+          Sign In & Start Shift
+        </button>
+
+        <!-- Quick Demo Profiles for convenience -->
+        <div class="pt-2 border-t border-slate-800 text-center space-y-1.5">
+          <span class="text-[10px] text-slate-500 uppercase font-semibold">Quick Login for Registered Workers:</span>
+          <div class="flex justify-center space-x-2">
+            <button type="button" onclick="quickFillLogin('fatima', '123')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] rounded-lg text-slate-300">Fatima (Cashier)</button>
+            <button type="button" onclick="quickFillLogin('musa', '123')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] rounded-lg text-slate-300">Musa (Cashier)</button>
+            <button type="button" onclick="quickFillLogin('admin', '123')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] rounded-lg text-slate-300">Ahmed (Manager)</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- FORM: REGISTER NEW WORKER -->
+      <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-3 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name:</label>
+          <input type="text" id="reg-name" required placeholder="e.g. Sani Abubakar" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Username:</label>
+            <input type="text" id="reg-username" required placeholder="sani" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Role / Shift:</label>
+            <select id="reg-role" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+              <option value="Cashier (Morning)">Cashier (Morning)</option>
+              <option value="Cashier (Evening)">Cashier (Evening)</option>
+              <option value="Manager / Owner">Manager / Owner</option>
+              <option value="Dispenser Operator">Dispenser Operator</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Password / PIN:</label>
+            <input type="password" id="reg-password" required placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Phone Number:</label>
+            <input type="tel" id="reg-phone" placeholder="08012345678" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+          </div>
+        </div>
+
+        <div id="reg-error" class="hidden p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 font-medium"></div>
+
+        <button type="submit" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-lg shadow-emerald-500/25 transition active:scale-[0.98]">
+          Register Worker & Sign In
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ================= TOP HEADER ================= -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('pos')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg text-white">Gas Station POS</span>
+            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">REFILL STATION</span>
+          </div>
+          <p id="nav-station-name" class="text-xs text-slate-400 truncate">Cooking Gas Refilling Station</p>
+        </div>
+      </div>
+
+      <!-- Middle: Live Gas Rate & Tank Stock -->
+      <div class="flex items-center space-x-3">
+        <!-- Price per KG -->
+        <div onclick="openRateModal()" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-orange-500/50 cursor-pointer transition" title="Click to change Price per KG">
+          <div class="w-2 h-2 rounded-full bg-orange-400 animate-ping"></div>
+          <span class="text-xs text-slate-400">Rate:</span>
+          <span id="nav-price-per-kg" class="font-extrabold text-sm text-orange-400 font-mono-numbers">₦1,250</span>
+          <span class="text-[10px] text-slate-500">/kg</span>
+        </div>
+
+        <!-- Available Gas in Tank -->
+        <div onclick="switchTab('records')" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-emerald-500/50 cursor-pointer text-xs transition">
+          <span class="text-slate-400">Gas in Tank:</span>
+          <span id="nav-tank-stock" class="font-extrabold text-emerald-400 font-mono-numbers">3,826 KG</span>
+        </div>
+      </div>
+
+      <!-- Right: Logged-in Worker Info & Switch Shift -->
+      <div class="flex items-center space-x-2">
+        <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs">
+          <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+          <div>
+            <div id="nav-current-user-name" class="font-bold text-white leading-tight">Fatima Adamu</div>
+            <div id="nav-current-user-role" class="text-[10px] text-slate-400 leading-none">Cashier</div>
+          </div>
+        </div>
+
+        <button onclick="handleLogout()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-semibold transition" title="Handover shift / switch worker">
+          Shift Handover
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Navigation Bar: 3 Clean Tabs -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 border-t border-slate-800/60 py-2 flex items-center justify-between">
+      <nav class="flex items-center space-x-2">
+        <button onclick="switchTab('pos')" id="tab-btn-pos" class="flex items-center space-x-1.5 px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition bg-orange-500 text-white shadow-lg shadow-orange-500/30">
+          <span>1. Cashier POS</span>
+        </button>
+
+        <button onclick="switchTab('records')" id="tab-btn-records" class="flex items-center space-x-1.5 px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:bg-slate-800 border border-slate-800">
+          <span>2. Purchases & Sales</span>
+        </button>
+
+        <button onclick="switchTab('logs')" id="tab-btn-logs" class="flex items-center space-x-1.5 px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:bg-slate-800 border border-slate-800">
+          <span>3. Transparency Audit Logs</span>
+          <span id="badge-logs-count" class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded-full border border-slate-700">0</span>
+        </button>
+      </nav>
+
+      <div class="text-[11px] text-slate-500 hidden md:block">
+        Every action is logged with worker name & timestamp.
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ================= PAGE 1: CASHIER POS WINDOW ================= -->
+    <div id="view-pos" class="space-y-6 block">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT: Cylinder Presets & Keypad (7 cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+            
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select Cylinder Weight</span>
+              <span class="text-xs text-slate-400">Current Rate: <strong id="pos-rate-indicator" class="text-orange-400">₦1,250</strong> / kg</span>
+            </div>
+
+            <!-- Mode Switcher -->
+            <div class="grid grid-cols-3 gap-2 my-4 p-1 bg-slate-950 rounded-xl border border-slate-800">
+              <button type="button" onclick="setPosMode('preset')" id="btn-mode-preset" class="py-2 px-3 rounded-lg text-xs sm:text-sm font-bold bg-orange-500 text-white shadow">
+                Standard Cylinders
+              </button>
+              <button type="button" onclick="setPosMode('customKg')" id="btn-mode-kg" class="py-2 px-3 rounded-lg text-xs sm:text-sm font-bold text-slate-400 hover:text-white">
+                Enter KG
+              </button>
+              <button type="button" onclick="setPosMode('customNaira')" id="btn-mode-naira" class="py-2 px-3 rounded-lg text-xs sm:text-sm font-bold text-slate-400 hover:text-white">
+                Enter Naira (₦)
+              </button>
+            </div>
+
+            <!-- Standard Cylinders Grid -->
+            <div id="pos-container-preset" class="space-y-4">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                
+                <button type="button" onclick="selectPreset(3)" class="preset-btn p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition" data-kg="3">
+                  <div class="text-2xl font-black text-white">3 kg</div>
+                  <div class="mt-2 text-xs font-bold text-orange-400 preset-price" data-kg="3">₦3,750</div>
+                </button>
+
+                <button type="button" onclick="selectPreset(5)" class="preset-btn p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition" data-kg="5">
+                  <div class="text-2xl font-black text-white">5 kg</div>
+                  <div class="mt-2 text-xs font-bold text-orange-400 preset-price" data-kg="5">₦6,250</div>
+                </button>
+
+                <button type="button" onclick="selectPreset(6)" class="preset-btn relative p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition" data-kg="6">
+                  <span class="absolute -top-2 right-2 bg-orange-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full">POPULAR</span>
+                  <div class="text-2xl font-black text-white">6 kg</div>
+                  <div class="mt-2 text-xs font-bold text-orange-400 preset-price" data-kg="6">₦7,500</div>
+                </button>
+
+                <button type="button" onclick="selectPreset(10)" class="preset-btn p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition" data-kg="10">
+                  <div class="text-2xl font-black text-white">10 kg</div>
+                  <div class="mt-2 text-xs font-bold text-orange-400 preset-price" data-kg="10">₦12,500</div>
+                </button>
+
+                <!-- 12.5 kg (Default selected) -->
+                <button type="button" onclick="selectPreset(12.5)" class="preset-btn relative p-3.5 rounded-xl border border-orange-500 bg-orange-500/10 text-left transition ring-2 ring-orange-500/30" data-kg="12.5">
+                  <span class="absolute -top-2 right-2 bg-orange-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full">STANDARD</span>
+                  <div class="text-2xl font-black text-white">12.5 kg</div>
+                  <div class="mt-2 text-xs font-bold text-orange-400 preset-price" data-kg="12.5">₦15,625</div>
+                </button>
+
+                <button type="button" onclick="selectPreset(25)" class="preset-btn p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition" data-kg="25">
+                  <div class="text-2xl font-black text-white">25 kg</div>
+                  <div class="mt-2 text-xs font-bold text-orange-400 preset-price" data-kg="25">₦31,250</div>
+                </button>
+
+                <button type="button" onclick="selectPreset(50)" class="preset-btn p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 text-left transition" data-kg="50">
+                  <div class="text-2xl font-black text-white">50 kg</div>
+                  <div class="mt-2 text-xs font-bold text-orange-400 preset-price" data-kg="50">₦62,500</div>
+                </button>
+
+              </div>
+
+              <!-- Multiplier -->
+              <div class="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800">
+                <span class="text-xs font-semibold text-slate-300">Quantity of Cylinders:</span>
+                <div class="flex items-center space-x-3">
+                  <button type="button" onclick="changeQty(-1)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-lg">-</button>
+                  <span id="pos-qty-display" class="text-lg font-bold text-white w-6 text-center">1</span>
+                  <button type="button" onclick="changeQty(1)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-lg">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Exact KG Entry -->
+            <div id="pos-container-kg" class="space-y-3 hidden">
+              <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Enter Exact Weight in KG:</label>
+                <div class="relative">
+                  <input type="number" id="input-custom-kg" step="0.1" min="0.1" oninput="recalculate()" placeholder="e.g. 7.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-2xl font-bold text-white focus:outline-none focus:border-orange-500 font-mono-numbers">
+                  <span class="absolute right-4 top-3.5 text-slate-400 font-bold">KG</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Naira Budget Entry -->
+            <div id="pos-container-naira" class="space-y-3 hidden">
+              <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Enter Amount in Naira (₦):</label>
+                <div class="relative">
+                  <span class="absolute left-4 top-3 text-2xl font-bold text-orange-400">₦</span>
+                  <input type="number" id="input-custom-naira" step="100" min="200" oninput="recalculate()" placeholder="e.g. 2000" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-2xl font-bold text-white focus:outline-none focus:border-orange-500 font-mono-numbers">
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: Bill & Quick Payment (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+            
+            <!-- Big Total Screen -->
+            <div class="p-5 bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 rounded-xl text-center space-y-2">
+              <span id="pos-bill-spec" class="text-xs font-semibold text-slate-400 block">12.5kg Cylinder</span>
+              <div class="text-4xl font-black text-emerald-400 font-mono-numbers">
+                <span id="pos-bill-naira">₦15,625</span>
+              </div>
+              <div class="text-sm font-bold text-slate-300">
+                Total Weight: <span id="pos-bill-kg" class="text-orange-400">12.5</span> KG
+              </div>
+            </div>
+
+            <!-- Payment Method Buttons -->
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Customer Payment Method</label>
+              <div class="grid grid-cols-3 gap-2">
+                
+                <button type="button" onclick="setPaymentMethod('POS_CARD')" id="pay-btn-pos" class="pay-method-btn p-3 rounded-xl border flex flex-col items-center justify-center space-y-1 bg-blue-500/10 border-blue-500 text-blue-300 ring-2 ring-blue-500/20">
+                  <span class="text-lg">💳</span>
+                  <span class="text-xs font-black">POS MACHINE</span>
+                </button>
+
+                <button type="button" onclick="setPaymentMethod('CASH')" id="pay-btn-cash" class="pay-method-btn p-3 rounded-xl border flex flex-col items-center justify-center space-y-1 bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200">
+                  <span class="text-lg">💵</span>
+                  <span class="text-xs font-black">CASH</span>
+                </button>
+
+                <button type="button" onclick="setPaymentMethod('BANK_TRANSFER')" id="pay-btn-transfer" class="pay-method-btn p-3 rounded-xl border flex flex-col items-center justify-center space-y-1 bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200">
+                  <span class="text-lg">📱</span>
+                  <span class="text-xs font-black">TRANSFER</span>
+                </button>
+
+              </div>
+            </div>
+
+            <!-- One Click Big Button: PAID & PRINT RECEIPTS -->
+            <button type="button" onclick="handleQuickSale()" id="btn-quick-sale" class="w-full py-5 px-6 rounded-2xl font-black text-lg flex items-center justify-center space-x-2 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-slate-950 shadow-xl shadow-orange-500/25 transition active:scale-[0.98]">
+              <svg class="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              <span>PAID — PRINT 2 RECEIPTS</span>
+            </button>
+
+            <p class="text-center text-[11px] text-slate-500">
+              Prints 2 identical copies automatically (1 for Customer, 1 for the Dispenser refiller outside).
+            </p>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= PAGE 2: PURCHASES & SALES RECORDS ================= -->
+    <div id="view-records" class="space-y-6 hidden">
+      
+      <!-- Top Overview & Manual Gas Purchase Button -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="font-extrabold text-white text-xl">Station Gas Inventory & Sales Records</h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Track current remaining gas in tank, record bulk gas purchases, and view all sales records.
+          </p>
+        </div>
+
+        <button onclick="openPurchaseModal()" class="flex items-center space-x-2 px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition active:scale-95">
+          <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>+ RECORD NEW GAS PURCHASE</span>
+        </button>
+      </div>
+
+      <!-- Inventory & Today's Sales Numbers -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        
+        <!-- Gas Left in Tank -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold block">Remaining Gas in Tank</span>
+          <div id="stat-tank-stock" class="text-2xl font-black text-emerald-400 mt-1 font-mono-numbers">3,826 KG</div>
+          <p class="text-[10px] text-slate-500 mt-0.5">Automatically reduces on each sale</p>
+        </div>
+
+        <!-- Today's Total Money Made -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold block">Today's Total Sales</span>
+          <div id="stat-today-revenue" class="text-2xl font-black text-white mt-1 font-mono-numbers">₦0</div>
+          <p id="stat-today-kg-sold" class="text-[10px] text-orange-400 mt-0.5">0 KG sold today</p>
+        </div>
+
+        <!-- POS Machine Sales -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold block">POS Machine Payments</span>
+          <div id="stat-pos-sales" class="text-xl font-bold text-blue-400 mt-1 font-mono-numbers">₦0</div>
+          <p class="text-[10px] text-slate-500 mt-0.5">Card swipes at cashier POS</p>
+        </div>
+
+        <!-- Cash & Transfers -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold block">Cash & Transfers</span>
+          <div id="stat-cash-transfer-sales" class="text-xl font-bold text-slate-200 mt-1 font-mono-numbers">₦0</div>
+          <p id="stat-cash-transfer-sub" class="text-[10px] text-slate-500 mt-0.5">Cash: ₦0 | Trf: ₦0</p>
+        </div>
+
+      </div>
+
+      <!-- Bulk Purchases History -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h3 class="font-bold text-white text-base">Bulk Gas Purchase Log (When Station Buys Gas)</h3>
+          <span id="purchase-count-badge" class="text-xs text-slate-400">0 purchases logged</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-3">Date</th>
+                <th class="py-2.5 px-3">Supplier / Depot</th>
+                <th class="py-2.5 px-3">Truck Plate</th>
+                <th class="py-2.5 px-3">Waybill #</th>
+                <th class="py-2.5 px-3">Quantity (KG)</th>
+                <th class="py-2.5 px-3">Cost/KG</th>
+                <th class="py-2.5 px-3">Total Amount</th>
+              </tr>
+            </thead>
+            <tbody id="purchases-table-body" class="divide-y divide-slate-800/60"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sales History Log -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h3 class="font-bold text-white text-base">Sales Records Log</h3>
+          <button onclick="exportCSV()" class="text-xs text-emerald-400 hover:underline font-semibold">Download Excel/CSV</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-3">Receipt / Token</th>
+                <th class="py-2.5 px-3">Time & Date</th>
+                <th class="py-2.5 px-3">Cashier</th>
+                <th class="py-2.5 px-3">Cylinder</th>
+                <th class="py-2.5 px-3">Weight (KG)</th>
+                <th class="py-2.5 px-3">Amount (₦)</th>
+                <th class="py-2.5 px-3">Payment</th>
+                <th class="py-2.5 px-3 text-center">Reprint</th>
+              </tr>
+            </thead>
+            <tbody id="sales-table-body" class="divide-y divide-slate-800/60"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= PAGE 3: TRANSPARENCY AUDIT LOGS ================= -->
+    <div id="view-logs" class="space-y-6 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h2 class="font-extrabold text-white text-xl">Worker Transparency & Action Audit Trail</h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">
+            Real-time immutable log of every action taken in the station: who logged in, who made which sale, who added gas stock, and who changed prices.
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <input type="text" id="log-search" oninput="renderAuditLogs()" placeholder="Search staff or action..." class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 w-52">
+          
+          <select id="log-filter-action" onchange="renderAuditLogs()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-orange-500">
+            <option value="ALL">All Actions</option>
+            <option value="USER_LOGIN">Logins & Shifts</option>
+            <option value="SALE_COMPLETED">Refill Sales</option>
+            <option value="GAS_PURCHASED">Gas Purchases</option>
+            <option value="PRICE_CHANGED">Price Changes</option>
+            <option value="USER_REGISTER">Worker Registrations</option>
+          </select>
+
+          <button onclick="loadLogs()" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition" title="Refresh Logs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Logs Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Date & Time</th>
+                <th class="py-3 px-4">Staff Member</th>
+                <th class="py-3 px-4">Role / Shift</th>
+                <th class="py-3 px-4">Action Type</th>
+                <th class="py-3 px-4">Details Description</th>
+              </tr>
+            </thead>
+            <tbody id="logs-table-body" class="divide-y divide-slate-800/60 font-mono text-[11px]"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. DUAL RECEIPT MODAL (Thermal Print Preview) -->
+  <div id="modal-receipt" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 class="font-bold text-white text-base">Receipts Ready to Print</h3>
+          <p id="receipt-modal-token" class="text-xs text-orange-400 font-mono font-bold">TOKEN: TKN-314</p>
+        </div>
+        <button onclick="closeReceiptModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <!-- Printable Area (2 Duplicate Receipts) -->
+      <div class="max-h-[60vh] overflow-y-auto bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-center">
+        <div id="printable-receipt-container" class="w-[300px] bg-white text-black p-3 font-mono text-[11px] leading-snug shadow">
+          
+          <!-- COPY 1: CUSTOMER COPY -->
+          <div class="text-center pb-2 border-b border-dashed border-gray-400">
+            <div id="receipt-station-name" class="font-black text-[13px] uppercase">LPG COOKING GAS STATION</div>
+            <div id="receipt-station-address" class="text-[9px] text-gray-600">Refilling Plant</div>
+            <div class="mt-1 text-[10px] font-bold bg-gray-200 py-0.5 rounded">*** CUSTOMER RECEIPT ***</div>
+          </div>
+
+          <div class="py-1.5 space-y-0.5 border-b border-dashed border-gray-300 text-[10px]">
+            <div class="flex justify-between"><span>Receipt #:</span><span id="receipt-order-no" class="font-bold">GF-001</span></div>
+            <div class="flex justify-between"><span>Cashier on Duty:</span><span id="receipt-cashier-name" class="font-bold">Fatima</span></div>
+            <div class="flex justify-between"><span>Date/Time:</span><span id="receipt-datetime">21 Nov 2026</span></div>
+            <div class="flex justify-between"><span>Payment:</span><span id="receipt-payment" class="font-bold">POS MACHINE</span></div>
+          </div>
+
+          <div class="py-2 border-b border-dashed border-gray-400">
+            <div class="flex justify-between font-black text-[13px]">
+              <span id="receipt-spec">12.5kg Refill</span>
+              <span id="receipt-total">₦15,625</span>
+            </div>
+            <div class="text-[9px] text-gray-600" id="receipt-rate-calc">Weight: 12.5 KG @ ₦1,250/kg</div>
+          </div>
+
+          <div class="text-center py-1.5 text-[9px] text-gray-600">
+            Thank you for cooking with us! Keep cylinder upright.
+          </div>
+
+          <!-- TEAR HERE CUT LINE -->
+          <div class="my-3 py-1.5 border-y-2 border-dashed border-black text-center font-bold text-[9px] uppercase bg-gray-100">
+            ✂ ✂ ✂ &nbsp; TEAR HERE &nbsp; ✂ ✂ ✂
+          </div>
+
+          <!-- COPY 2: REFILLER / DISPENSER WORKER COPY -->
+          <div class="text-center pb-2 border-b border-dashed border-gray-400">
+            <div class="text-[11px] font-black uppercase bg-black text-white py-0.5 rounded">
+              DISPENSER REFILL SLIP
+            </div>
+          </div>
+
+          <div class="my-2 p-2 bg-gray-100 border border-gray-300 rounded text-center">
+            <div class="text-[9px] uppercase font-bold text-gray-600">REFILL TOKEN:</div>
+            <div id="receipt-slip-token" class="text-[24px] font-black text-black">TKN-314</div>
+          </div>
+
+          <div class="py-1.5 space-y-1 border-b border-dashed border-gray-400 text-[11px]">
+            <div class="flex justify-between text-[14px] font-black bg-yellow-100 p-1 border border-yellow-300 rounded">
+              <span>REFILL WEIGHT:</span>
+              <span id="receipt-slip-kg" class="underline">12.5 KG</span>
+            </div>
+            <div class="flex justify-between text-[10px]"><span>Receipt Ref:</span><span id="receipt-slip-ref">GF-001</span></div>
+          </div>
+
+          <div class="pt-2 text-center text-[8px] text-gray-500 italic">
+            Worker: Key exact weight into dispenser & check for gas leaks.
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-2 pt-2">
+        <button onclick="printReceipt()" class="flex-1 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-slate-950 font-black rounded-xl text-sm shadow-lg shadow-orange-500/25 transition">
+          Print 2 Receipts (Direct Print)
+        </button>
+        <button onclick="closeReceiptModal()" class="py-3 px-4 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">
+          Next Customer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 2. RECORD NEW GAS PURCHASE MODAL (When station buys gas) -->
+  <div id="modal-purchase" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="font-bold text-white text-base">Record Bulk Gas Purchase</h3>
+        <button onclick="closePurchaseModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <form onsubmit="handlePurchaseSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Quantity of Gas Bought (KG):</label>
+          <input type="number" id="purchase-kg" step="1" required placeholder="e.g. 3500 (or 5000)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-lg font-bold text-white focus:outline-none focus:border-emerald-500 font-mono-numbers">
+          <p class="text-[10px] text-slate-500 mt-1">Tip: 1 Metric Ton = 1,000 KG. (e.g. 3.5 Tons = 3,500 KG)</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Supplier / Depot Name:</label>
+            <input type="text" id="purchase-supplier" required placeholder="e.g. NNPC / Matrix" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Truck Plate Number:</label>
+            <input type="text" id="purchase-truck" placeholder="e.g. KMC-102-XA" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Waybill Number:</label>
+            <input type="text" id="purchase-waybill" placeholder="WB-9921" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-300 mb-1">Purchase Cost per KG (₦):</label>
+            <input type="number" id="purchase-cost" value="1050" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closePurchaseModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-emerald-500/20">Add to Tank Inventory</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. CHANGE PRICE PER KG MODAL -->
+  <div id="modal-rate" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h3 class="font-bold text-white text-base">Update Cooking Gas Rate</h3>
+        <button onclick="closeRateModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <form onsubmit="handleRateSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-orange-400 mb-1">Price per KG (₦):</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-xl font-bold text-orange-400">₦</span>
+            <input type="number" id="input-new-rate" required min="100" class="w-full bg-slate-950 border border-orange-500/50 rounded-xl pl-8 pr-12 py-2.5 text-2xl font-black text-white font-mono-numbers">
+            <span class="absolute right-3.5 top-3 text-xs text-slate-400">/ KG</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeRateModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-orange-500 text-slate-950 font-black rounded-xl text-xs">Save New Rate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -61,6 +61,77 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
+// LANDING PAGE CALCULATOR & PRESENTATION
+// ============================================================
+let landingCalcKg = 12.5;
+
+function setLandingCalcKg(kg) {
+  landingCalcKg = Number(kg);
+  const input = document.getElementById('landing-custom-kg');
+  if (input) input.value = '';
+
+  // Update UI buttons
+  document.querySelectorAll('.landing-calc-btn').forEach(btn => {
+    const bkg = Number(btn.getAttribute('data-kg'));
+    if (bkg === landingCalcKg) {
+      btn.className = 'landing-calc-btn relative p-3.5 rounded-2xl border-2 border-burgundy bg-burgundy-subtle text-left transition ring-2 ring-burgundy/20';
+    } else {
+      btn.className = 'landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition';
+    }
+  });
+
+  recalculateLandingTotal();
+}
+
+function onLandingCustomKgInput() {
+  const input = document.getElementById('landing-custom-kg');
+  const val = Number(input?.value);
+  if (val && val > 0) {
+    landingCalcKg = val;
+    // Unselect presets
+    document.querySelectorAll('.landing-calc-btn').forEach(btn => {
+      btn.className = 'landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition';
+    });
+    recalculateLandingTotal();
+  }
+}
+
+function recalculateLandingTotal() {
+  const rate = state.pricePerKg || 1250;
+  const total = Math.round(landingCalcKg * rate);
+  safeSet('landing-calc-total', '₦' + total.toLocaleString());
+  safeSet('landing-calc-kg-summary', landingCalcKg.toString());
+}
+
+function updateLandingUI(overview) {
+  if (!overview) return;
+  const stationName = overview.station?.name || "Al-Barakah Modern LPG Gas Station";
+  const rate = overview.settings?.pricePerKg || state.pricePerKg || 1250;
+  const stock = overview.tank?.currentStockKg || 4000;
+  const address = overview.station?.address || "Plot 14, Commercial Avenue, Bypass Road";
+  const phone = overview.station?.phone || "+234 803 123 4567";
+  const rc = overview.station?.rcNumber || "RC: 1849204";
+
+  safeSet('landing-station-name', stationName);
+  safeSet('landing-price-display', '₦' + rate.toLocaleString());
+  safeSet('landing-tank-display', stock.toLocaleString());
+  safeSet('calc-rate-badge', '₦' + rate.toLocaleString() + ' / KG');
+  safeSet('landing-address', address + (overview.station?.city ? ', ' + overview.station.city : ''));
+  safeSet('landing-phone', phone);
+  safeSet('landing-rc', rc + ' • Licensed LPG Dispensing Plant');
+
+  // Update preset prices on landing page
+  document.querySelectorAll('[data-calc-price]').forEach(el => {
+    const kg = Number(el.getAttribute('data-calc-price'));
+    if (kg) {
+      el.textContent = '₦' + (Math.round(kg * rate)).toLocaleString();
+    }
+  });
+
+  recalculateLandingTotal();
+}
+
+// ============================================================
 // AUTH & SHIFTS
 // ============================================================
 function checkAuth() {
@@ -75,11 +146,23 @@ function checkAuth() {
       return;
     } catch (e) {}
   }
-  showAuthOverlay();
+  // When visitor lands on the site, show the landing page
+  state.currentUser = null;
+  updateUserHeader();
+  hideAuthOverlay();
+  buildNav();
+  switchTab('landing');
 }
 
-function showAuthOverlay() { document.getElementById('auth-overlay').classList.remove('hidden'); }
-function hideAuthOverlay() { document.getElementById('auth-overlay').classList.add('hidden'); }
+function showAuthOverlay() { 
+  const el = document.getElementById('auth-overlay');
+  if (el) el.classList.remove('hidden'); 
+}
+
+function hideAuthOverlay() { 
+  const el = document.getElementById('auth-overlay');
+  if (el) el.classList.add('hidden'); 
+}
 
 function quickFillLogin(u, p) {
   document.getElementById('login-username').value = u;
@@ -132,15 +215,36 @@ async function handleLogout() {
   localStorage.removeItem('gasflow_user');
   state.currentUser = null;
   state.pendingOrder = null;
-  document.getElementById('main-nav').innerHTML = '';
-  showAuthOverlay();
+  updateUserHeader();
+  buildNav();
+  switchTab('landing');
   loadLogs();
 }
 
 function updateUserHeader() {
-  if (!state.currentUser) return;
-  safeSet('nav-current-user-name', state.currentUser.name);
-  safeSet('nav-current-user-role', state.currentUser.role);
+  const userBadge = document.getElementById('nav-user-badge');
+  const logoutBtn = document.getElementById('nav-btn-logout');
+  const signinBtn = document.getElementById('nav-btn-signin');
+
+  if (state.currentUser) {
+    if (userBadge) {
+      userBadge.classList.remove('hidden');
+      userBadge.classList.add('flex');
+    }
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+    if (signinBtn) signinBtn.classList.add('hidden');
+    safeSet('nav-current-user-name', state.currentUser.name);
+    safeSet('nav-current-user-role', state.currentUser.role);
+  } else {
+    if (userBadge) {
+      userBadge.classList.add('hidden');
+      userBadge.classList.remove('flex');
+    }
+    if (logoutBtn) logoutBtn.classList.add('hidden');
+    if (signinBtn) signinBtn.classList.remove('hidden');
+    safeSet('nav-current-user-name', 'Guest Visitor');
+    safeSet('nav-current-user-role', 'Public');
+  }
 }
 
 // ============================================================
@@ -166,7 +270,17 @@ function isCashier() {
 // ============================================================
 function buildNav() {
   const nav = document.getElementById('main-nav');
+  if (!nav) return;
   nav.innerHTML = '';
+
+  if (!state.currentUser) {
+    // Visitor navigation
+    nav.appendChild(makeNavBtn('landing', '🏠 Station Overview & Price Calculator'));
+    return;
+  }
+
+  // Logged-in Navigation
+  nav.appendChild(makeNavBtn('landing', '🏠 Public Overview'));
 
   if (isOwner()) {
     // Owner only sees Admin Dashboard
@@ -193,7 +307,9 @@ function makeNavBtn(tab, label) {
 }
 
 function goHome() {
-  if (isOwner()) {
+  if (!state.currentUser) {
+    switchTab('landing');
+  } else if (isOwner()) {
     switchTab('admin');
   } else {
     switchTab('pos');
@@ -202,17 +318,21 @@ function goHome() {
 
 function switchTab(tab) {
   // Permission checks
+  if (!state.currentUser && tab !== 'landing') {
+    showAuthOverlay();
+    return;
+  }
   if (tab === 'admin' && !isOwner()) {
-    tab = 'pos';
+    tab = isManager() || isCashier() ? 'pos' : 'landing';
   }
   if ((tab === 'sales' || tab === 'management' || tab === 'workers') && !isManager() && !isOwner()) {
-    tab = 'pos';
+    tab = isCashier() ? 'pos' : 'landing';
   }
 
   state.currentTab = tab;
 
   // Toggle views
-  const allViews = ['view-pos', 'view-sales', 'view-management', 'view-workers', 'view-admin'];
+  const allViews = ['view-landing', 'view-pos', 'view-sales', 'view-management', 'view-workers', 'view-admin'];
   allViews.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -231,13 +351,15 @@ function switchTab(tab) {
   const activeClass   = 'px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition bg-burgundy text-white shadow-md';
   const inactiveClass = 'px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition border border-gray-200 text-gray-500 hover:bg-gray-50';
 
-  ['pos', 'sales', 'management', 'workers', 'admin'].forEach(t => {
+  ['landing', 'pos', 'sales', 'management', 'workers', 'admin'].forEach(t => {
     const btn = document.getElementById(`tab-btn-${t}`);
     if (btn) btn.className = t === tab ? activeClass : inactiveClass;
   });
 
   // Load view data
-  if (tab === 'pos') {
+  if (tab === 'landing') {
+    if (state.overview) updateLandingUI(state.overview);
+  } else if (tab === 'pos') {
     loadOverview();
   } else if (tab === 'sales') {
     loadOverview();
@@ -284,6 +406,7 @@ async function loadOverview() {
     if (state.currentTab === 'management') renderManagementTab();
     if (state.currentTab === 'admin')      renderAdminDashboard();
 
+    updateLandingUI(data);
     recalculate();
   } catch (err) {
     console.error('Overview error:', err);

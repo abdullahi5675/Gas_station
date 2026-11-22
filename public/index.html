@@ -25,7 +25,8 @@
      AUTH OVERLAY — LOGIN ONLY
 =================================================================== -->
 <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-sm hidden">
-  <div class="bg-white border border-gray-200 rounded-3xl max-w-sm w-full p-8 shadow-2xl space-y-6">
+  <div class="relative bg-white border border-gray-200 rounded-3xl max-w-sm w-full p-8 shadow-2xl space-y-6">
+    <button type="button" onclick="hideAuthOverlay()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 font-bold text-lg p-1 transition" title="Close">✕</button>
 
     <div class="text-center space-y-2 pb-4 border-b border-gray-100">
       <div class="w-16 h-16 mx-auto rounded-2xl bg-burgundy flex items-center justify-center shadow-lg mb-3">
@@ -128,13 +129,25 @@
       </div>
     </div>
 
-    <!-- Right: User info -->
-    <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
-      <div class="w-2 h-2 rounded-full bg-army animate-pulse"></div>
-      <div>
-        <div id="nav-current-user-name" class="font-bold text-gray-900 leading-tight">–</div>
-        <div id="nav-current-user-role" class="text-[10px] text-gray-400 leading-none">–</div>
+    <!-- Right: Auth / User info -->
+    <div class="flex items-center space-x-2">
+      <!-- When Logged Out -->
+      <button id="nav-btn-signin" onclick="showAuthOverlay()" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-burgundy hover:bg-burgundy-dark text-white text-xs font-bold rounded-xl shadow transition active:scale-95">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        <span>Staff Sign In</span>
+      </button>
+
+      <!-- When Logged In -->
+      <div id="nav-user-badge" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
+        <div class="w-2 h-2 rounded-full bg-army animate-pulse"></div>
+        <div>
+          <div id="nav-current-user-name" class="font-bold text-gray-900 leading-tight">–</div>
+          <div id="nav-current-user-role" class="text-[10px] text-gray-400 leading-none">–</div>
+        </div>
       </div>
+      <button id="nav-btn-logout" onclick="handleLogout()" class="hidden px-2.5 py-1.5 text-xs text-gray-500 hover:text-burgundy hover:bg-burgundy-subtle rounded-xl border border-gray-200 transition font-medium" title="Log out">
+        Logout
+      </button>
     </div>
   </div>
 
@@ -149,6 +162,235 @@
      MAIN
 =================================================================== -->
 <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+
+  <!-- ============ LANDING PAGE (Public Station Overview) ============ -->
+  <div id="view-landing" class="space-y-12">
+    <!-- Hero Section -->
+    <div class="relative bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm overflow-hidden">
+      <!-- Background decorative tint -->
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-burgundy/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-army/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-3xl space-y-6">
+        <!-- Status Pill -->
+        <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-army-subtle border border-army-muted text-xs text-army font-bold">
+          <span class="w-2 h-2 rounded-full bg-army animate-pulse"></span>
+          <span>Station Operational • Certified Digital Dispensing Plant</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight leading-tight">
+          Safe, Accurate &amp; Transparent <br class="hidden sm:inline" />
+          <span class="text-burgundy">LPG Cooking Gas Refilling</span>
+        </h1>
+
+        <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-2xl">
+          Welcome to <strong class="text-gray-900" id="landing-station-name">Al-Barakah Modern LPG Gas Station</strong>. We deliver calibrated, precision-metered cooking gas refilling with automatic tare deduction, tamper-proof security tokens, and instant dual thermal receipts.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button onclick="showAuthOverlay()" class="px-6 py-3.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-2xl font-black text-sm shadow-lg shadow-burgundy/20 transition active:scale-95 flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+            <span>Staff &amp; Station Portal</span>
+          </button>
+          <a href="#landing-calc" class="px-6 py-3.5 bg-army-subtle hover:bg-army-muted text-army border border-army-muted rounded-2xl font-bold text-sm transition active:scale-95 flex items-center space-x-2">
+            <svg class="w-5 h-5 text-army" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            <span>Check Gas Price Calculator</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-gray-100">
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <span class="text-base">⛽</span>
+            <span>Current Retail Price</span>
+          </div>
+          <div class="mt-2 text-3xl font-black text-burgundy font-mono"><span id="landing-price-display">₦1,250</span> <span class="text-xs font-semibold text-gray-400">/ KG</span></div>
+          <p class="text-[11px] text-gray-400 mt-1">Guaranteed uniform price across all islands</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <span class="text-base">🛢️</span>
+            <span>Station Tank Stock</span>
+          </div>
+          <div class="mt-2 text-3xl font-black text-army font-mono"><span id="landing-tank-display">4,000</span> <span class="text-xs font-semibold text-gray-400">KG</span></div>
+          <p class="text-[11px] text-gray-400 mt-1">Active bulk reserve • Uninterrupted refill</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <span class="text-base">⏱️</span>
+            <span>Operating Hours</span>
+          </div>
+          <div class="mt-2 text-2xl font-black text-gray-900">7:00 AM – 9:00 PM</div>
+          <p class="text-[11px] text-gray-400 mt-1">Open 7 days a week (Monday – Sunday)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Customer Cylinder Price Calculator -->
+    <div id="landing-calc" class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100 gap-2">
+        <div>
+          <span class="text-xs font-bold text-burgundy uppercase tracking-wider">Interactive Tool</span>
+          <h2 class="text-2xl font-black text-gray-900 mt-0.5">Live Cylinder Refill Price Calculator</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Select a standard cylinder size or enter custom weight to see the exact price.</p>
+        </div>
+        <div class="text-left sm:text-right">
+          <span class="text-[11px] text-gray-400 block">Current Selling Rate:</span>
+          <span id="calc-rate-badge" class="text-lg font-black text-burgundy font-mono">₦1,250 / KG</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Left: Presets & Controls -->
+        <div class="lg:col-span-7 space-y-5">
+          <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Select Standard Cylinder</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button type="button" onclick="setLandingCalcKg(3)"    class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="3">
+              <div class="text-xl font-black text-gray-900">3 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="3">₦3,750</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(5)"    class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="5">
+              <div class="text-xl font-black text-gray-900">5 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="5">₦6,250</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(6)"    class="landing-calc-btn relative p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="6">
+              <span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">POPULAR</span>
+              <div class="text-xl font-black text-gray-900">6 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="6">₦7,500</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(10)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="10">
+              <div class="text-xl font-black text-gray-900">10 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="10">₦12,500</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(12.5)" class="landing-calc-btn relative p-3.5 rounded-2xl border-2 border-burgundy bg-burgundy-subtle text-left transition ring-2 ring-burgundy/20" data-kg="12.5">
+              <span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">STANDARD</span>
+              <div class="text-xl font-black text-gray-900">12.5 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="12.5">₦15,625</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(25)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="25">
+              <div class="text-xl font-black text-gray-900">25 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="25">₦31,250</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(50)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="50">
+              <div class="text-xl font-black text-gray-900">50 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="50">₦62,500</div>
+            </button>
+          </div>
+
+          <!-- Custom KG or Custom Amount Toggle -->
+          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
+            <span class="text-xs font-bold text-gray-600 block">Or Enter Any Custom Weight:</span>
+            <div class="relative">
+              <input type="number" id="landing-custom-kg" step="0.5" min="0.5" oninput="onLandingCustomKgInput()" placeholder="e.g. 7.5"
+                class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-lg font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy pr-16 font-mono">
+              <span class="absolute right-4 top-3.5 text-gray-400 font-bold text-sm">KG</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Calculated Result Card -->
+        <div class="lg:col-span-5">
+          <div class="bg-gray-50 border-2 border-burgundy-muted rounded-3xl p-6 text-center space-y-4">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Estimated Refill Price</span>
+            <div class="text-4xl sm:text-5xl font-black text-army font-mono tracking-tight" id="landing-calc-total">₦15,625</div>
+            
+            <div class="inline-flex items-center space-x-2 px-3 py-1 bg-burgundy-subtle border border-burgundy-muted rounded-full text-xs font-bold text-burgundy">
+              <span>Weight:</span>
+              <span id="landing-calc-kg-summary">12.5</span>
+              <span>KG Net Gas</span>
+            </div>
+
+            <p class="text-xs text-gray-500 leading-relaxed pt-2 border-t border-gray-200">
+              100% tare deducted. You pay strictly for pure cooking gas with zero cylinder weight included.
+            </p>
+
+            <button onclick="showAuthOverlay()" class="w-full py-3.5 bg-burgundy hover:bg-burgundy-dark text-white font-black text-sm rounded-2xl shadow transition active:scale-95 flex items-center justify-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span>Cashier / Staff Sign In</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Pillars of Al-Barakah LPG -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-burgundy-subtle border border-burgundy-muted flex items-center justify-center text-2xl">⚖️</div>
+        <h3 class="font-extrabold text-base text-gray-900">Zero-Tare Accuracy</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Our calibrated digital load cells deduct the cylinder's tare weight automatically. You receive 100% of the gas you pay for.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-army-subtle border border-army-muted flex items-center justify-center text-2xl">🧾</div>
+        <h3 class="font-extrabold text-base text-gray-900">Dual Security Receipts</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Every transaction prints a customer receipt plus a dispenser refill slip with a unique security token code for dispenser verification.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-burgundy-subtle border border-burgundy-muted flex items-center justify-center text-2xl">🛡️</div>
+        <h3 class="font-extrabold text-base text-gray-900">Certified Safety Checks</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Attendants inspect cylinder neck valves, rubber rings, and test for pin leaks before refilling to safeguard your family and property.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-army-subtle border border-army-muted flex items-center justify-center text-2xl">💳</div>
+        <h3 class="font-extrabold text-base text-gray-900">Instant Payments</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Seamlessly pay with card on our high-speed POS terminals, verified instant bank transfer, or cash at the cashier island.
+        </p>
+      </div>
+    </div>
+
+    <!-- Staff Portal Access Banner -->
+    <div class="bg-gradient-to-r from-army-subtle via-white to-burgundy-subtle border border-gray-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+      <div class="space-y-2 text-center sm:text-left">
+        <div class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-burgundy text-white text-[11px] font-bold">
+          <span>🔐</span>
+          <span>Station Staff &amp; Executive Access</span>
+        </div>
+        <h3 class="text-xl sm:text-2xl font-black text-gray-900">Operating System &amp; Shift Management</h3>
+        <p class="text-xs text-gray-600 max-w-xl">
+          Authorized cashiers, station managers, and the station owner can access their dedicated refilling terminal, depot records, and financial overview.
+        </p>
+      </div>
+      <button onclick="showAuthOverlay()" class="flex-shrink-0 px-6 py-3.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-2xl font-black text-sm shadow-lg shadow-burgundy/25 transition active:scale-95 flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        <span>Sign In to System</span>
+      </button>
+    </div>
+
+    <!-- Station Location & Details Footer -->
+    <div class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <h4 class="font-extrabold text-sm text-gray-900 mb-2">📍 Station Location</h4>
+          <p class="text-xs text-gray-600 leading-relaxed" id="landing-address">Plot 14, Commercial Avenue, Bypass Road, Kano / Abuja</p>
+        </div>
+        <div>
+          <h4 class="font-extrabold text-sm text-gray-900 mb-2">📞 Contact &amp; Deliveries</h4>
+          <p class="text-xs text-gray-600" id="landing-phone">+234 803 123 4567</p>
+          <p class="text-xs text-gray-400 mt-1">Bulk refill &amp; corporate inquiries welcome.</p>
+        </div>
+        <div>
+          <h4 class="font-extrabold text-sm text-gray-900 mb-2">🛡️ Plant Compliance</h4>
+          <p class="text-xs text-gray-600" id="landing-rc">RC: 1849204 • NMDPRA Standard Compliant</p>
+          <p class="text-xs text-gray-400 mt-1">GasFlow Plant POS System v1.0</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ============ CASHIER ============ -->
   <div id="view-pos" class="space-y-6 hidden">

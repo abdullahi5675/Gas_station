@@ -27,7 +27,7 @@
     "tankId": "TANK-01",
     "name": "Bulk LPG Skid Tank 1",
     "capacityKg": 5000,
-    "currentStockKg": 3985,
+    "currentStockKg": 4000,
     "lowStockThresholdKg": 800,
     "maxSafeFillPercent": 85,
     "lastDeliveryDate": null
@@ -68,46 +68,7 @@
     "status": "OPEN"
   },
   "shiftHistory": [],
-  "orders": [
-    {
-      "id": "ORD-1795342124645",
-      "orderNumber": "GF-20261122-3674",
-      "tokenCode": "TKN-H949",
-      "customerName": "Walk-in Household",
-      "customerPhone": "N/A",
-      "cylinderType": "5kg Cylinder",
-      "kgRequested": 5,
-      "ratePerKg": 1250,
-      "totalAmount": 6250,
-      "paymentMethod": "POS_CARD",
-      "paymentRef": "POS-APPROVED",
-      "cashierName": "Fatima Adamu",
-      "attendantName": "Island Attendant",
-      "pump": "Pump 1 (North Island)",
-      "status": "PAID",
-      "createdAt": "2026-11-22T10:08:44.646Z",
-      "completedAt": null
-    },
-    {
-      "id": "ORD-1795342156798",
-      "orderNumber": "GF-20261122-2408",
-      "tokenCode": "TKN-G604",
-      "customerName": "Walk-in Household",
-      "customerPhone": "N/A",
-      "cylinderType": "10kg Cylinder",
-      "kgRequested": 10,
-      "ratePerKg": 1250,
-      "totalAmount": 12500,
-      "paymentMethod": "BANK_TRANSFER",
-      "paymentRef": "TRANSFER-CONFIRMED",
-      "cashierName": "Fatima Adamu",
-      "attendantName": "Island Attendant",
-      "pump": "Pump 1 (North Island)",
-      "status": "PAID",
-      "createdAt": "2026-11-22T10:09:16.799Z",
-      "completedAt": null
-    }
-  ],
+  "orders": [],
   "tankDeliveries": [],
   "tankDips": [],
   "users": [
@@ -118,7 +79,7 @@
       "password": "123",
       "role": "Owner / Admin",
       "phone": "08031234567",
-      "createdAt": "2026-11-22T08:00:00.000Z"
+      "createdAt": "2026-11-22 12:36:11.365673+00"
     },
     {
       "id": "usr-admin",
@@ -127,7 +88,7 @@
       "password": "123",
       "role": "Owner / Admin",
       "phone": "08031234567",
-      "createdAt": "2026-11-22T08:00:00.000Z"
+      "createdAt": "2026-11-22 12:36:11.365673+00"
     },
     {
       "id": "usr-manager",
@@ -136,7 +97,7 @@
       "password": "123",
       "role": "Manager",
       "phone": "08039876543",
-      "createdAt": "2026-11-22T08:00:00.000Z"
+      "createdAt": "2026-11-22 12:36:11.365673+00"
     },
     {
       "id": "usr-fatima",
@@ -145,137 +106,17 @@
       "password": "123",
       "role": "Cashier (Morning Shift)",
       "phone": "08023456789",
-      "createdAt": "2026-11-22T08:00:00.000Z"
+      "createdAt": "2026-11-22 12:36:11.365673+00"
     }
   ],
   "auditLogs": [
     {
-      "id": "LOG-1795342212435-419",
-      "timestamp": "2026-11-22T10:10:12.435Z",
-      "userName": "Alhaji Sanusi",
-      "role": "Owner / Admin",
-      "action": "USER_LOGIN",
-      "details": "Alhaji Sanusi (Owner / Admin) logged in for duty/shift."
-    },
-    {
-      "id": "LOG-1795342210533-188",
-      "timestamp": "2026-11-22T10:10:10.533Z",
-      "userName": "Ahmed Yahaya",
-      "role": "Manager",
-      "action": "USER_LOGOUT",
-      "details": "Ahmed Yahaya (Manager) signed out / handed over shift."
-    },
-    {
-      "id": "LOG-1795342205089-129",
-      "timestamp": "2026-11-22T10:10:05.089Z",
-      "userName": "Ahmed Yahaya",
-      "role": "Manager",
-      "action": "USER_LOGIN",
-      "details": "Ahmed Yahaya (Manager) logged in for duty/shift."
-    },
-    {
-      "id": "LOG-1795342202676-807",
-      "timestamp": "2026-11-22T10:10:02.676Z",
-      "userName": "Ahmed Yahaya",
-      "role": "Manager",
-      "action": "USER_LOGOUT",
-      "details": "Ahmed Yahaya (Manager) signed out / handed over shift."
-    },
-    {
-      "id": "LOG-1795342176729-233",
-      "timestamp": "2026-11-22T10:09:36.729Z",
-      "userName": "Ahmed Yahaya",
-      "role": "Manager",
-      "action": "USER_LOGIN",
-      "details": "Ahmed Yahaya (Manager) logged in for duty/shift."
-    },
-    {
-      "id": "LOG-1795342174749-406",
-      "timestamp": "2026-11-22T10:09:34.749Z",
-      "userName": "Fatima Adamu",
-      "role": "Cashier (Morning Shift)",
-      "action": "USER_LOGOUT",
-      "details": "Fatima Adamu (Cashier (Morning Shift)) signed out / handed over shift."
-    },
-    {
-      "id": "LOG-1795342156799-216",
-      "timestamp": "2026-11-22T10:09:16.799Z",
-      "userName": "Fatima Adamu",
-      "role": "Cashier (Morning Shift)",
-      "action": "SALE_COMPLETED",
-      "details": "Fatima Adamu completed 10 KG refill sale for ₦12,500 via BANK_TRANSFER. (Token: TKN-G604)"
-    },
-    {
-      "id": "LOG-1795342128302-836",
-      "timestamp": "2026-11-22T10:08:48.302Z",
-      "userName": "Fatima Adamu",
-      "role": "Cashier (Morning Shift)",
-      "action": "SALE_COMPLETED",
-      "details": "Fatima Adamu completed 5 KG refill sale for ₦6,250 via POS_CARD. (Token: TKN-H949)"
-    },
-    {
-      "id": "LOG-1795342117150-540",
-      "timestamp": "2026-11-22T10:08:37.151Z",
-      "userName": "Fatima Adamu",
-      "role": "Cashier (Morning Shift)",
-      "action": "USER_LOGIN",
-      "details": "Fatima Adamu (Cashier (Morning Shift)) logged in for duty/shift."
-    },
-    {
-      "id": "LOG-1795342115086-787",
-      "timestamp": "2026-11-22T10:08:35.086Z",
-      "userName": "Alhaji Sanusi",
-      "role": "Owner / Admin",
-      "action": "USER_LOGOUT",
-      "details": "Alhaji Sanusi (Owner / Admin) signed out / handed over shift."
-    },
-    {
-      "id": "LOG-1795342088454-887",
-      "timestamp": "2026-11-22T10:08:08.454Z",
-      "userName": "Alhaji Sanusi",
-      "role": "Owner / Admin",
-      "action": "USER_LOGIN",
-      "details": "Alhaji Sanusi (Owner / Admin) logged in for duty/shift."
-    },
-    {
-      "id": "LOG-1795342085278-381",
-      "timestamp": "2026-11-22T10:08:05.278Z",
-      "userName": "Ahmed Yahaya",
-      "role": "Manager",
-      "action": "USER_LOGOUT",
-      "details": "Ahmed Yahaya (Manager) signed out / handed over shift."
-    },
-    {
-      "id": "LOG-1795342061711-168",
-      "timestamp": "2026-11-22T10:07:41.711Z",
-      "userName": "Ahmed Yahaya",
-      "role": "Manager",
-      "action": "USER_LOGIN",
-      "details": "Ahmed Yahaya (Manager) logged in for duty/shift."
-    },
-    {
-      "id": "LOG-1795342059869-232",
-      "timestamp": "2026-11-22T10:07:39.869Z",
-      "userName": "Fatima Adamu",
-      "role": "Cashier (Morning Shift)",
-      "action": "USER_LOGOUT",
-      "details": "Fatima Adamu (Cashier (Morning Shift)) signed out / handed over shift."
-    },
-    {
-      "id": "LOG-1795342037167-414",
-      "timestamp": "2026-11-22T10:07:17.174Z",
-      "userName": "Fatima Adamu",
-      "role": "Cashier (Morning Shift)",
-      "action": "USER_LOGIN",
-      "details": "Fatima Adamu (Cashier (Morning Shift)) logged in for duty/shift."
-    },
-    {
       "id": "LOG-INIT",
-      "timestamp": "2026-11-22T08:00:00.000Z",
+      "timestamp": "2026-11-22 12:36:11.957897+00",
       "userName": "System",
       "role": "Admin",
       "action": "SYSTEM_START",
-      "details": "GasFlow station management system initialized clean and ready for operations."
+      "details": "Clean database schema initialized with 3 test accounts."
     }
   ]
 }

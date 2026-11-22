@@ -1,6 +1,35 @@
 // GasFlow LPG Refilling Station — POS, Management & Admin Dashboard
 // White + Burgundy + Army Green Theme | Role-based views | Two-step cashier flow
 
+// ============================================================
+// PASSWORD EYE TOGGLE
+// ============================================================
+function toggleEye(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (!input) return;
+
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+
+  // Swap icon between "eye" (visible) and "eye-off" (hidden)
+  if (icon) {
+    icon.innerHTML = isHidden
+      // eye-off — password now visible, click to hide
+      ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>`
+      // eye — password now hidden, click to show
+      : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
+  }
+}
+
+// ============================================================
+// FORGOT PASSWORD INFO BOX
+// ============================================================
+function showForgotPassword() {
+  const box = document.getElementById('forgot-box');
+  if (box) box.classList.toggle('hidden');
+}
+
 let state = {
   currentUser: null,
   overview: null,
@@ -55,22 +84,9 @@ function checkAuth() {
 function showAuthOverlay() { document.getElementById('auth-overlay').classList.remove('hidden'); }
 function hideAuthOverlay() { document.getElementById('auth-overlay').classList.add('hidden'); }
 
-function setAuthMode(mode) {
-  const isLogin = mode === 'login';
-  document.getElementById('form-login').classList.toggle('hidden', !isLogin);
-  document.getElementById('form-register').classList.toggle('hidden', isLogin);
-
-  document.getElementById('btn-tab-login').className = isLogin
-    ? 'py-2 rounded-lg bg-burgundy text-white shadow'
-    : 'py-2 rounded-lg text-gray-500 hover:text-gray-900';
-  document.getElementById('btn-tab-register').className = !isLogin
-    ? 'py-2 rounded-lg bg-burgundy text-white shadow'
-    : 'py-2 rounded-lg text-gray-500 hover:text-gray-900';
-
-  document.getElementById('auth-subtitle').textContent = isLogin
-    ? 'LPG Refilling Station — Staff Login'
-    : 'Register a New Worker Account';
-}
+// No longer used for switching tabs on the public login page (login-only now)
+// Kept for any internal references
+function setAuthMode(mode) {}
 
 function quickFillLogin(u, p) {
   document.getElementById('login-username').value = u;
@@ -115,7 +131,14 @@ async function handleRegisterSubmit(e) {
   const password = document.getElementById('reg-password').value.trim();
   const phone    = document.getElementById('reg-phone').value.trim();
   const errorEl  = document.getElementById('reg-error');
-  errorEl.classList.add('hidden');
+  const successEl = document.getElementById('reg-success');
+  if (errorEl)   errorEl.classList.add('hidden');
+  if (successEl) successEl.classList.add('hidden');
+
+  if (!name || !username || !password) {
+    if (errorEl) { errorEl.textContent = 'Please fill in Full Name, Username and Password.'; errorEl.classList.remove('hidden'); }
+    return;
+  }
 
   try {
     const res  = await fetch('/api/auth/register', {
@@ -126,18 +149,30 @@ async function handleRegisterSubmit(e) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-    state.currentUser = data.user;
-    localStorage.setItem('gasflow_user', JSON.stringify(data.user));
-    updateUserHeader();
-    hideAuthOverlay();
-    buildNav();
-    goHome();
+    // ✅ Stay on Manager page — do NOT switch user session
+    if (successEl) {
+      successEl.textContent = `✅ Worker "${data.user.name}" registered successfully as ${data.user.role}.`;
+      successEl.classList.remove('hidden');
+    }
+    resetRegisterForm();
     loadLogs();
-    alert(`Worker account created for ${data.user.name}! You are now on duty.`);
   } catch (err) {
-    errorEl.textContent = err.message;
-    errorEl.classList.remove('hidden');
+    if (errorEl) { errorEl.textContent = err.message; errorEl.classList.remove('hidden'); }
   }
+}
+
+function resetRegisterForm() {
+  ['reg-name', 'reg-username', 'reg-password', 'reg-phone'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const roleEl = document.getElementById('reg-role');
+  if (roleEl) roleEl.value = 'Cashier (Morning)';
+  // Reset eye toggle back to hidden
+  const passEl = document.getElementById('reg-password');
+  if (passEl) passEl.type = 'password';
+  const eye = document.getElementById('eye-reg');
+  if (eye) eye.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
 }
 
 async function handleLogout() {

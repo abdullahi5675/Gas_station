@@ -1,79 +1,82 @@
-/* GasFlow LPG POS - High Performance Modern Styling */
+/* GasFlow LPG Station — White + Burgundy + Army Green Theme */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
 :root {
-  --bg-primary: #090d16;
-  --bg-card: #0f172a;
-  --bg-card-hover: #1e293b;
-  --bg-input: #060911;
-  --border: #1e293b;
-  --border-focus: #f97316;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --orange-primary: #ea580c;
-  --orange-light: #f97316;
-  --orange-glow: rgba(234, 88, 12, 0.25);
-  --emerald-primary: #10b981;
-  --emerald-glow: rgba(16, 185, 129, 0.2);
-  --blue-primary: #3b82f6;
-  --amber-primary: #f59e0b;
-  --rose-primary: #f43f5e;
+  --burgundy:        #800020;
+  --burgundy-dark:   #66001a;
+  --burgundy-light:  #9f1239;
+  --burgundy-subtle: #fff1f2;
+  --burgundy-muted:  #fce7eb;
+
+  --army:        #2d4a22;
+  --army-dark:   #1e3217;
+  --army-light:  #3f6b2c;
+  --army-subtle: #f0f7ec;
+  --army-muted:  #d9edcf;
 }
 
+/* ===== GLOBAL ===== */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background: #ffffff;
+  color: #111827;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.font-mono-numbers {
-  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
-}
+/* Mono font for numbers */
+.font-mono { font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace; }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f3f4f6; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #800020; }
 
-/* Thermal Print Styling (58mm / 80mm Direct Output) */
+/* ===== FOCUS RING ===== */
+:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 2px; }
+
+/* ===== PRINT STYLES ===== */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  #printable-receipt-container, #printable-receipt-container * {
-    visibility: visible;
-  }
+  /* Hide everything */
+  body > * { display: none !important; }
+
+  /* Show only the receipt */
+  #modal-receipt { display: block !important; position: static !important; background: none !important; }
   #printable-receipt-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 80mm;
-    margin: 0;
-    padding: 0;
-    background: #fff;
-    color: #000;
+    display: block !important;
+    width: 72mm !important;
+    padding: 4mm !important;
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    color: #000 !important;
+    background: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 auto !important;
   }
+
+  /* Hide modal chrome (header, buttons) */
+  #modal-receipt > div > div:first-child,
+  #modal-receipt > div > div:last-child {
+    display: none !important;
+  }
+
+  /* Show receipt area */
+  #modal-receipt > div > div:nth-child(2) {
+    display: block !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
   @page {
-    margin: 0;
+    margin: 4mm;
     size: 80mm auto;
   }
 }

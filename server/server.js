@@ -73,7 +73,7 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer(async (req, res) => {
+export async function handleRequest(req, res) {
   // CORS Preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
@@ -557,14 +557,19 @@ const server = http.createServer(async (req, res) => {
     console.error("Server error:", err);
     sendJson(res, 500, { error: err.message || "Internal Server Error" });
   }
-});
+}
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`========================================================`);
-  console.log(` GASFLOW LPG REFILLING PLANT POS SYSTEM ONLINE`);
-  console.log(` Station Dashboard: http://localhost:${PORT}`);
-  console.log(` Network Access:    http://0.0.0.0:${PORT}`);
-  console.log(` Storage:           data/gas_station_db.json`);
-  console.log(` Zero dependencies! Completely offline capable.`);
-  console.log(`========================================================`);
-});
+export const server = http.createServer(handleRequest);
+
+// Start standalone HTTP listener if run directly (local)
+if (!process.env.VERCEL) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`========================================================`);
+    console.log(` GASFLOW LPG REFILLING PLANT POS SYSTEM ONLINE`);
+    console.log(` Station Dashboard: http://localhost:${PORT}`);
+    console.log(` Network Access:    http://0.0.0.0:${PORT}`);
+    console.log(` Storage:           data/gas_station_db.json`);
+    console.log(` Zero dependencies! Completely offline capable.`);
+    console.log(`========================================================`);
+  });
+}

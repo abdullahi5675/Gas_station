@@ -111,14 +111,14 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { success: true, user: safeUser });
     }
 
-    // API: Authentication - Register New Staff
+    // API: Authentication - Register New Staff (Cashiers only, or password reset)
     if (pathname === '/api/auth/register' && req.method === 'POST') {
       const db = getDb();
       const body = await parseBody(req);
       const name = (body.name || '').trim();
       const username = (body.username || '').trim().toLowerCase();
       const password = (body.password || '').trim();
-      const role = (body.role || 'Cashier').trim();
+      const role = (body.role || 'Cashier (Morning)').trim();
       const phone = (body.phone || '').trim();
 
       if (!name || !username || !password) {
@@ -126,11 +126,24 @@ const server = http.createServer(async (req, res) => {
       }
 
       db.users = db.users || [];
-      const exists = db.users.find(u => u.username.toLowerCase() === username);
-      if (exists) {
-        return sendJson(res, 400, { error: "Username already taken. Please choose another username." });
+      const existingIndex = db.users.findIndex(u => u.username.toLowerCase() === username);
+
+      // If user exists, manager is resetting password/updating details
+      if (existingIndex !== -1) {
+        const existing = db.users[existingIndex];
+        existing.password = password;
+        if (name) existing.name = name;
+        if (role) existing.role = role;
+        if (phone) existing.phone = phone;
+
+        addAuditLog(db, name, role, "USER_UPDATED", `Manager reset password / updated details for worker ${name} (@${username}).`);
+        saveDb(db);
+
+        const safeUser = { id: existing.id, name: existing.name, username: existing.username, role: existing.role, phone: existing.phone };
+        return sendJson(res, 200, { success: true, user: safeUser, updated: true });
       }
 
+      // New cashier registration
       const newUser = {
         id: `usr-${Date.now()}`,
         name,
@@ -146,7 +159,63 @@ const server = http.createServer(async (req, res) => {
       saveDb(db);
 
       const safeUser = { id: newUser.id, name: newUser.name, username: newUser.username, role: newUser.role, phone: newUser.phone };
-      return sendJson(res, 201, { success: true, user: safeUser });
+      return sendJson(res, 201, { success: true, user: safeUser, updated: false });
+    }
+
+    // API: Authentication - Secret Executive Registration (Owner / Manager only)
+    if (pathname === '/api/auth/register-executive' && req.method === 'POST') {
+      const db = getDb();
+      const body = await parseBody(req);
+      const masterPasscode = (body.masterPasscode || '').trim();
+      const name = (body.name || '').trim();
+      const username = (body.username || '').trim().toLowerCase();
+      const password = (body.password || '').trim();
+      const role = (body.role || 'Manager').trim(); // "Owner / Admin" or "Manager"
+      const phone = (body.phone || '').trim();
+
+      // Secret Master Passcode validation
+      const VALID_MASTER_PASSCODES = ['GASFLOW-2026', 'station2026', 'admin2026', '12345'];
+      if (!VALID_MASTER_PASSCODES.includes(masterPasscode)) {
+        return sendJson(res, 403, { error: "Invalid Station Master Passcode. Authorization denied." });
+      }
+
+      if (!name || !username || !password) {
+        return sendJson(res, 400, { error: "Please enter Full Name, Username, and Password/PIN." });
+      }
+
+      db.users = db.users || [];
+      const existingIndex = db.users.findIndex(u => u.username.toLowerCase() === username);
+
+      if (existingIndex !== -1) {
+        const existing = db.users[existingIndex];
+        existing.name = name;
+        existing.password = password;
+        existing.role = role;
+        if (phone) existing.phone = phone;
+
+        addAuditLog(db, name, role, "USER_UPDATED", `Executive account updated via Station Master Panel: ${name} (${role}).`);
+        saveDb(db);
+
+        const safeUser = { id: existing.id, name: existing.name, username: existing.username, role: existing.role, phone: existing.phone };
+        return sendJson(res, 200, { success: true, user: safeUser, updated: true });
+      }
+
+      const newExec = {
+        id: `usr-${Date.now()}`,
+        name,
+        username,
+        password,
+        role,
+        phone,
+        createdAt: new Date().toISOString()
+      };
+
+      db.users.push(newExec);
+      addAuditLog(db, name, role, "USER_REGISTER", `Executive account registered via Station Master Panel: ${name} (${role}).`);
+      saveDb(db);
+
+      const safeUser = { id: newExec.id, name: newExec.name, username: newExec.username, role: newExec.role, phone: newExec.phone };
+      return sendJson(res, 201, { success: true, user: safeUser, updated: false });
     }
 
     // API: Authentication - Logout

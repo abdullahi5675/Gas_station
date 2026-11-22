@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GasFlow — LPG Refilling Station POS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            burgundy: { DEFAULT:'#800020', dark:'#66001a', light:'#9f1239', subtle:'#fff1f2', muted:'#fce7eb' },
+            army:     { DEFAULT:'#2d4a22', dark:'#1e3217', light:'#3f6b2c', subtle:'#f0f7ec', muted:'#d9edcf' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+
+<!-- ===================================================================
+     AUTH OVERLAY — LOGIN ONLY
+=================================================================== -->
+<div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-sm hidden">
+  <div class="relative bg-white border border-gray-200 rounded-3xl max-w-sm w-full p-8 shadow-2xl space-y-6">
+    <button type="button" onclick="hideAuthOverlay()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 font-bold text-lg p-1 transition" title="Close">✕</button>
+
+    <div class="text-center space-y-2 pb-4 border-b border-gray-100">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-burgundy flex items-center justify-center shadow-lg mb-3">
+        <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-black text-gray-900">GasFlow</h1>
+      <p class="text-xs text-gray-500">LPG Cooking Gas Refilling Station</p>
+    </div>
+
+    <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1.5">Username</label>
+        <input id="login-username" type="text" required autocomplete="username" placeholder="Enter your username"
+          class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy focus:border-burgundy transition">
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-xs font-semibold text-gray-700">Password / PIN</label>
+          <button type="button" onclick="showForgotPassword()" class="text-[11px] text-burgundy hover:underline font-medium">Forgot password?</button>
+        </div>
+        <div class="relative">
+          <input id="login-password" type="password" required autocomplete="current-password" placeholder="••••••"
+            class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy focus:border-burgundy font-mono transition">
+          <button type="button" onclick="toggleEye('login-password','eye-login')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-burgundy transition" tabindex="-1">
+            <svg id="eye-login" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="forgot-box" class="hidden p-3 bg-burgundy-subtle border border-burgundy-muted rounded-xl text-xs text-gray-700">
+        <div class="font-bold text-burgundy mb-1">🔑 Forgot your password?</div>
+        <p>Contact your <strong>Manager</strong> — they can reset your PIN from the Workers section in their panel.</p>
+      </div>
+
+      <div id="login-error" class="hidden p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium"></div>
+
+      <button type="submit"
+        class="w-full py-3.5 rounded-xl font-black text-sm bg-burgundy hover:bg-burgundy-dark text-white shadow-lg shadow-burgundy/20 transition active:scale-[0.98] flex items-center justify-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        <span>Sign In &amp; Start Shift</span>
+      </button>
+
+      <div class="pt-1 border-t border-gray-100 text-center space-y-2">
+        <span class="text-[10px] text-gray-400 uppercase font-semibold tracking-wide">Demo — Quick Login</span>
+        <div class="flex justify-center gap-2 flex-wrap">
+          <button type="button" onclick="quickFillLogin('fatima','123')" class="px-2.5 py-1.5 bg-gray-100 hover:bg-army-subtle text-[11px] rounded-lg text-gray-600 hover:text-army border border-gray-200 transition">Fatima (Cashier)</button>
+          <button type="button" onclick="quickFillLogin('manager','123')" class="px-2.5 py-1.5 bg-gray-100 hover:bg-burgundy-subtle text-[11px] rounded-lg text-gray-600 hover:text-burgundy border border-gray-200 transition">Ahmed (Manager)</button>
+          <button type="button" onclick="quickFillLogin('owner','123')"   class="px-2.5 py-1.5 bg-burgundy-subtle hover:bg-burgundy-muted text-[11px] rounded-lg text-burgundy border border-burgundy-muted transition">Sanusi (Owner)</button>
+        </div>
+      </div>
+
+      <!-- Secret Executive Setup Trigger -->
+      <div class="pt-2 border-t border-gray-100 text-center">
+        <button type="button" onclick="openSecretSetupModal()" class="text-[11px] text-gray-400 hover:text-burgundy flex items-center justify-center space-x-1.5 mx-auto font-medium transition" title="Restricted to Station Owner and General Manager">
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          <span>Station Master Setup (Owner &amp; Manager)</span>
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<!-- ===================================================================
+     TOP HEADER
+=================================================================== -->
+<header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+    <!-- Brand -->
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-burgundy flex items-center justify-center shadow">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+        </svg>
+      </div>
+      <div>
+        <span class="font-extrabold text-base text-gray-900">GasFlow</span>
+        <span class="ml-2 text-[10px] bg-army-subtle text-army font-bold px-2 py-0.5 rounded-full border border-army-muted">LPG STATION</span>
+      </div>
+    </div>
+
+    <!-- Centre: Rate + Tank -->
+    <div class="flex items-center space-x-2">
+      <div id="nav-rate-pill" onclick="openRateModal()" title="Update price (Manager only)"
+        class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-burgundy-subtle border border-burgundy-muted hover:border-burgundy cursor-pointer transition text-xs">
+        <div class="w-2 h-2 rounded-full bg-burgundy animate-pulse"></div>
+        <span class="text-gray-500">Rate:</span>
+        <span id="nav-price-per-kg" class="font-extrabold text-burgundy font-mono">₦1,250</span>
+        <span class="text-gray-400">/kg</span>
+      </div>
+      <div class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-army-subtle border border-army-muted text-xs">
+        <span class="text-gray-500">Tank:</span>
+        <span id="nav-tank-stock" class="font-extrabold text-army font-mono">– KG</span>
+      </div>
+    </div>
+
+    <!-- Right: Auth / User info -->
+    <div class="flex items-center space-x-2">
+      <!-- When Logged Out -->
+      <button id="nav-btn-signin" onclick="showAuthOverlay()" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-burgundy hover:bg-burgundy-dark text-white text-xs font-bold rounded-xl shadow transition active:scale-95">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        <span>Staff Sign In</span>
+      </button>
+
+      <!-- When Logged In -->
+      <div id="nav-user-badge" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
+        <div class="w-2 h-2 rounded-full bg-army animate-pulse"></div>
+        <div>
+          <div id="nav-current-user-name" class="font-bold text-gray-900 leading-tight">–</div>
+          <div id="nav-current-user-role" class="text-[10px] text-gray-400 leading-none">–</div>
+        </div>
+      </div>
+      <button id="nav-btn-logout" onclick="handleLogout()" class="hidden px-2.5 py-1.5 text-xs text-gray-500 hover:text-burgundy hover:bg-burgundy-subtle rounded-xl border border-gray-200 transition font-medium" title="Log out">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- NAV TABS -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 border-t border-gray-100 py-1.5 flex items-center justify-between">
+    <nav id="main-nav" class="flex items-center space-x-1"></nav>
+    <span id="nav-station-name" class="text-[11px] text-gray-400 hidden md:block truncate max-w-xs"></span>
+  </div>
+</header>
+
+<!-- ===================================================================
+     MAIN
+=================================================================== -->
+<main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+
+  <!-- ============ LANDING PAGE (Public Station Overview) ============ -->
+  <div id="view-landing" class="space-y-12">
+    <!-- Hero Section -->
+    <div class="relative bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm overflow-hidden">
+      <!-- Background decorative tint -->
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-burgundy/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-army/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-3xl space-y-6">
+        <!-- Status Pill -->
+        <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-army-subtle border border-army-muted text-xs text-army font-bold">
+          <span class="w-2 h-2 rounded-full bg-army animate-pulse"></span>
+          <span>Station Operational • Certified Digital Dispensing Plant</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight leading-tight">
+          Safe, Accurate &amp; Transparent <br class="hidden sm:inline" />
+          <span class="text-burgundy">LPG Cooking Gas Refilling</span>
+        </h1>
+
+        <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-2xl">
+          Welcome to <strong class="text-gray-900" id="landing-station-name">Al-Barakah Modern LPG Gas Station</strong>. We deliver calibrated, precision-metered cooking gas refilling with automatic tare deduction, tamper-proof security tokens, and instant dual thermal receipts.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button onclick="showAuthOverlay()" class="px-6 py-3.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-2xl font-black text-sm shadow-lg shadow-burgundy/20 transition active:scale-95 flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+            <span>Staff &amp; Station Portal</span>
+          </button>
+          <a href="#landing-calc" class="px-6 py-3.5 bg-army-subtle hover:bg-army-muted text-army border border-army-muted rounded-2xl font-bold text-sm transition active:scale-95 flex items-center space-x-2">
+            <svg class="w-5 h-5 text-army" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            <span>Check Gas Price Calculator</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-gray-100">
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <span class="text-base">⛽</span>
+            <span>Current Retail Price</span>
+          </div>
+          <div class="mt-2 text-3xl font-black text-burgundy font-mono"><span id="landing-price-display">₦1,250</span> <span class="text-xs font-semibold text-gray-400">/ KG</span></div>
+          <p class="text-[11px] text-gray-400 mt-1">Guaranteed uniform price across all islands</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <span class="text-base">🛢️</span>
+            <span>Station Tank Stock</span>
+          </div>
+          <div class="mt-2 text-3xl font-black text-army font-mono"><span id="landing-tank-display">4,000</span> <span class="text-xs font-semibold text-gray-400">KG</span></div>
+          <p class="text-[11px] text-gray-400 mt-1">Active bulk reserve • Uninterrupted refill</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <span class="text-base">⏱️</span>
+            <span>Operating Hours</span>
+          </div>
+          <div class="mt-2 text-2xl font-black text-gray-900">7:00 AM – 9:00 PM</div>
+          <p class="text-[11px] text-gray-400 mt-1">Open 7 days a week (Monday – Sunday)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Customer Cylinder Price Calculator -->
+    <div id="landing-calc" class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100 gap-2">
+        <div>
+          <span class="text-xs font-bold text-burgundy uppercase tracking-wider">Interactive Tool</span>
+          <h2 class="text-2xl font-black text-gray-900 mt-0.5">Live Cylinder Refill Price Calculator</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Select a standard cylinder size or enter custom weight to see the exact price.</p>
+        </div>
+        <div class="text-left sm:text-right">
+          <span class="text-[11px] text-gray-400 block">Current Selling Rate:</span>
+          <span id="calc-rate-badge" class="text-lg font-black text-burgundy font-mono">₦1,250 / KG</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Left: Presets & Controls -->
+        <div class="lg:col-span-7 space-y-5">
+          <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Select Standard Cylinder</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button type="button" onclick="setLandingCalcKg(3)"    class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="3">
+              <div class="text-xl font-black text-gray-900">3 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="3">₦3,750</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(5)"    class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="5">
+              <div class="text-xl font-black text-gray-900">5 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="5">₦6,250</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(6)"    class="landing-calc-btn relative p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="6">
+              <span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">POPULAR</span>
+              <div class="text-xl font-black text-gray-900">6 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="6">₦7,500</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(10)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="10">
+              <div class="text-xl font-black text-gray-900">10 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="10">₦12,500</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(12.5)" class="landing-calc-btn relative p-3.5 rounded-2xl border-2 border-burgundy bg-burgundy-subtle text-left transition ring-2 ring-burgundy/20" data-kg="12.5">
+              <span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">STANDARD</span>
+              <div class="text-xl font-black text-gray-900">12.5 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="12.5">₦15,625</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(25)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="25">
+              <div class="text-xl font-black text-gray-900">25 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="25">₦31,250</div>
+            </button>
+            <button type="button" onclick="setLandingCalcKg(50)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="50">
+              <div class="text-xl font-black text-gray-900">50 KG</div>
+              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="50">₦62,500</div>
+            </button>
+          </div>
+
+          <!-- Custom KG or Custom Amount Toggle -->
+          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
+            <span class="text-xs font-bold text-gray-600 block">Or Enter Any Custom Weight:</span>
+            <div class="relative">
+              <input type="number" id="landing-custom-kg" step="0.5" min="0.5" oninput="onLandingCustomKgInput()" placeholder="e.g. 7.5"
+                class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-lg font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy pr-16 font-mono">
+              <span class="absolute right-4 top-3.5 text-gray-400 font-bold text-sm">KG</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Calculated Result Card -->
+        <div class="lg:col-span-5">
+          <div class="bg-gray-50 border-2 border-burgundy-muted rounded-3xl p-6 text-center space-y-4">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Estimated Refill Price</span>
+            <div class="text-4xl sm:text-5xl font-black text-army font-mono tracking-tight" id="landing-calc-total">₦15,625</div>
+            
+            <div class="inline-flex items-center space-x-2 px-3 py-1 bg-burgundy-subtle border border-burgundy-muted rounded-full text-xs font-bold text-burgundy">
+              <span>Weight:</span>
+              <span id="landing-calc-kg-summary">12.5</span>
+              <span>KG Net Gas</span>
+            </div>
+
+            <p class="text-xs text-gray-500 leading-relaxed pt-2 border-t border-gray-200">
+              100% tare deducted. You pay strictly for pure cooking gas with zero cylinder weight included.
+            </p>
+
+            <button onclick="showAuthOverlay()" class="w-full py-3.5 bg-burgundy hover:bg-burgundy-dark text-white font-black text-sm rounded-2xl shadow transition active:scale-95 flex items-center justify-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span>Cashier / Staff Sign In</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Pillars of Al-Barakah LPG -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-burgundy-subtle border border-burgundy-muted flex items-center justify-center text-2xl">⚖️</div>
+        <h3 class="font-extrabold text-base text-gray-900">Zero-Tare Accuracy</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Our calibrated digital load cells deduct the cylinder's tare weight automatically. You receive 100% of the gas you pay for.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-army-subtle border border-army-muted flex items-center justify-center text-2xl">🧾</div>
+        <h3 class="font-extrabold text-base text-gray-900">Dual Security Receipts</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Every transaction prints a customer receipt plus a dispenser refill slip with a unique security token code for dispenser verification.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-burgundy-subtle border border-burgundy-muted flex items-center justify-center text-2xl">🛡️</div>
+        <h3 class="font-extrabold text-base text-gray-900">Certified Safety Checks</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Attendants inspect cylinder neck valves, rubber rings, and test for pin leaks before refilling to safeguard your family and property.
+        </p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-army-subtle border border-army-muted flex items-center justify-center text-2xl">💳</div>
+        <h3 class="font-extrabold text-base text-gray-900">Instant Payments</h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Seamlessly pay with card on our high-speed POS terminals, verified instant bank transfer, or cash at the cashier island.
+        </p>
+      </div>
+    </div>
+
+    <!-- Staff Portal Access Banner -->
+    <div class="bg-gradient-to-r from-army-subtle via-white to-burgundy-subtle border border-gray-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+      <div class="space-y-2 text-center sm:text-left">
+        <div class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-burgundy text-white text-[11px] font-bold">
+          <span>🔐</span>
+          <span>Station Staff &amp; Executive Access</span>
+        </div>
+        <h3 class="text-xl sm:text-2xl font-black text-gray-900">Operating System &amp; Shift Management</h3>
+        <p class="text-xs text-gray-600 max-w-xl">
+          Authorized cashiers, station managers, and the station owner can access their dedicated refilling terminal, depot records, and financial overview.
+        </p>
+      </div>
+      <button onclick="showAuthOverlay()" class="flex-shrink-0 px-6 py-3.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-2xl font-black text-sm shadow-lg shadow-burgundy/25 transition active:scale-95 flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        <span>Sign In to System</span>
+      </button>
+    </div>
+
+    <!-- Station Location & Details Footer -->
+    <div class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <h4 class="font-extrabold text-sm text-gray-900 mb-2">📍 Station Location</h4>
+          <p class="text-xs text-gray-600 leading-relaxed" id="landing-address">Plot 14, Commercial Avenue, Bypass Road, Kano / Abuja</p>
+        </div>
+        <div>
+          <h4 class="font-extrabold text-sm text-gray-900 mb-2">📞 Contact &amp; Deliveries</h4>
+          <p class="text-xs text-gray-600" id="landing-phone">+234 803 123 4567</p>
+          <p class="text-xs text-gray-400 mt-1">Bulk refill &amp; corporate inquiries welcome.</p>
+        </div>
+        <div>
+          <h4 class="font-extrabold text-sm text-gray-900 mb-2">🛡️ Plant Compliance</h4>
+          <p class="text-xs text-gray-600" id="landing-rc">RC: 1849204 • NMDPRA Standard Compliant</p>
+          <p class="text-xs text-gray-400 mt-1">GasFlow Plant POS System v1.0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CASHIER ============ -->
+  <div id="view-pos" class="space-y-6 hidden">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="font-extrabold text-xl text-gray-900">Cashier</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Select cylinder → Confirm payment → Print receipt</p>
+      </div>
+      <button onclick="handleLogout()" class="logout-btn">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        <span>Logout</span>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- LEFT: Cylinder selector -->
+      <div class="lg:col-span-7">
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Cylinder Size</span>
+            <span class="text-xs text-gray-400">Rate: <strong id="pos-rate-indicator" class="text-burgundy">₦1,250</strong>/kg</span>
+          </div>
+          <!-- Mode switcher -->
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-gray-100 rounded-xl mb-4">
+            <button onclick="setPosMode('preset')"      id="btn-mode-preset" class="py-2 px-2 rounded-lg text-xs font-bold bg-burgundy text-white shadow">Standard Cylinders</button>
+            <button onclick="setPosMode('customKg')"    id="btn-mode-kg"     class="py-2 px-2 rounded-lg text-xs font-bold text-gray-500 hover:text-gray-900">Enter KG</button>
+            <button onclick="setPosMode('customNaira')" id="btn-mode-naira"  class="py-2 px-2 rounded-lg text-xs font-bold text-gray-500 hover:text-gray-900">Enter Naira (₦)</button>
+          </div>
+          <!-- Presets -->
+          <div id="pos-container-preset" class="space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button onclick="selectPreset(3)"    class="preset-btn p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="3"><div class="text-2xl font-black text-gray-900">3 kg</div><div class="mt-1 text-xs font-bold text-burgundy preset-price" data-kg="3">₦3,750</div></button>
+              <button onclick="selectPreset(5)"    class="preset-btn p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="5"><div class="text-2xl font-black text-gray-900">5 kg</div><div class="mt-1 text-xs font-bold text-burgundy preset-price" data-kg="5">₦6,250</div></button>
+              <button onclick="selectPreset(6)"    class="preset-btn relative p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="6"><span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">POPULAR</span><div class="text-2xl font-black text-gray-900">6 kg</div><div class="mt-1 text-xs font-bold text-burgundy preset-price" data-kg="6">₦7,500</div></button>
+              <button onclick="selectPreset(10)"   class="preset-btn p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="10"><div class="text-2xl font-black text-gray-900">10 kg</div><div class="mt-1 text-xs font-bold text-burgundy preset-price" data-kg="10">₦12,500</div></button>
+              <button onclick="selectPreset(12.5)" class="preset-btn relative p-3.5 rounded-xl border-2 border-burgundy bg-burgundy-subtle text-left transition ring-2 ring-burgundy/20" data-kg="12.5"><span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">STANDARD</span><div class="text-2xl font-black text-gray-900">12.5 kg</div><div class="mt-1 text-xs font-bold text-burgundy preset-price" data-kg="12.5">₦15,625</div></button>
+              <button onclick="selectPreset(25)"   class="preset-btn p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="25"><div class="text-2xl font-black text-gray-900">25 kg</div><div class="mt-1 text-xs font-bold text-burgundy preset-price" data-kg="25">₦31,250</div></button>
+              <button onclick="selectPreset(50)"   class="preset-btn p-3.5 rounded-xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="50"><div class="text-2xl font-black text-gray-900">50 kg</div><div class="mt-1 text-xs font-bold text-burgundy preset-price" data-kg="50">₦62,500</div></button>
+            </div>
+            <div class="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200">
+              <span class="text-xs font-semibold text-gray-700">Quantity of Cylinders:</span>
+              <div class="flex items-center space-x-3">
+                <button onclick="changeQty(-1)" class="w-9 h-9 rounded-lg bg-white hover:bg-gray-100 border border-gray-300 font-bold text-lg shadow-sm">-</button>
+                <span id="pos-qty-display" class="text-xl font-black text-gray-900 w-8 text-center">1</span>
+                <button onclick="changeQty(1)"  class="w-9 h-9 rounded-lg bg-white hover:bg-gray-100 border border-gray-300 font-bold text-lg shadow-sm">+</button>
+              </div>
+            </div>
+          </div>
+          <div id="pos-container-kg" class="hidden p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Exact Weight in KG:</label>
+            <div class="relative"><input type="number" id="input-custom-kg" step="0.1" min="0.1" oninput="recalculate()" placeholder="e.g. 7.5" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy pr-16 font-mono"><span class="absolute right-4 top-3.5 text-gray-400 font-bold">KG</span></div>
+          </div>
+          <div id="pos-container-naira" class="hidden p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Amount in Naira (₦):</label>
+            <div class="relative"><span class="absolute left-4 top-3 text-2xl font-bold text-burgundy">₦</span><input type="number" id="input-custom-naira" step="100" min="200" oninput="recalculate()" placeholder="e.g. 5000" class="w-full bg-white border border-gray-300 rounded-xl pl-10 pr-4 py-3 text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy font-mono"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Bill + Action -->
+      <div class="lg:col-span-5">
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-5">
+          <div class="p-5 bg-gray-50 border border-gray-200 rounded-xl text-center space-y-1">
+            <span id="pos-bill-spec" class="text-xs font-semibold text-gray-500 block">12.5kg Cylinder</span>
+            <div class="text-5xl font-black text-army font-mono"><span id="pos-bill-naira">₦15,625</span></div>
+            <div class="text-sm font-bold text-gray-500">Weight: <span id="pos-bill-kg" class="text-burgundy">12.5</span> KG</div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Payment Method</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setPaymentMethod('POS_CARD')"      id="pay-btn-pos"      class="pay-method-btn p-3 rounded-xl border-2 border-burgundy bg-burgundy-subtle text-burgundy flex flex-col items-center space-y-1 ring-2 ring-burgundy/20"><span class="text-xl">💳</span><span class="text-xs font-black">POS MACHINE</span></button>
+              <button onclick="setPaymentMethod('CASH')"           id="pay-btn-cash"     class="pay-method-btn p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 flex flex-col items-center space-y-1 hover:border-army hover:text-army hover:bg-army-subtle"><span class="text-xl">💵</span><span class="text-xs font-black">CASH</span></button>
+              <button onclick="setPaymentMethod('BANK_TRANSFER')" id="pay-btn-transfer" class="pay-method-btn p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 flex flex-col items-center space-y-1 hover:border-army hover:text-army hover:bg-army-subtle"><span class="text-xl">📱</span><span class="text-xs font-black">TRANSFER</span></button>
+            </div>
+          </div>
+          <!-- Step 1 -->
+          <div id="step-paid-section">
+            <button onclick="handleMarkPaid()" id="btn-mark-paid" class="w-full py-5 rounded-2xl font-black text-lg flex items-center justify-center space-x-3 bg-burgundy hover:bg-burgundy-dark text-white shadow-lg shadow-burgundy/25 transition active:scale-[0.98]">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+              <span>MARK AS PAID</span>
+            </button>
+            <p class="text-center text-[11px] text-gray-400 mt-2">Step 1 — Confirm payment received first</p>
+          </div>
+          <!-- Step 2 -->
+          <div id="step-print-section" class="hidden space-y-3">
+            <div class="p-3 bg-army-subtle border border-army-muted rounded-xl flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-full bg-army text-white flex items-center justify-center font-black text-sm flex-shrink-0">✓</div>
+              <div><div class="text-xs font-black text-army">Payment Recorded!</div><div id="paid-receipt-ref" class="text-[11px] text-army/70 font-mono"></div></div>
+            </div>
+            <button onclick="doPrintReceipts()" class="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center space-x-3 bg-army hover:bg-army-dark text-white shadow-lg transition active:scale-[0.98]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              <span>PRINT 2 RECEIPTS</span>
+            </button>
+            <button onclick="resetPosForNextCustomer()" class="w-full py-2 text-xs text-gray-400 hover:text-gray-700 underline">Skip print — Next Customer →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SALES RECORDS (Manager) ============ -->
+  <div id="view-sales" class="space-y-6 hidden">
+    <div class="flex items-center justify-between">
+      <div><h2 class="font-extrabold text-xl text-gray-900">Sales Records</h2><p class="text-xs text-gray-500 mt-0.5">Today's summary and full sales history.</p></div>
+      <button onclick="handleLogout()" class="logout-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg><span>Logout</span></button>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">Today's Revenue</span><div id="sales-stat-revenue" class="text-2xl font-black text-gray-900 mt-1 font-mono">₦0</div><div id="sales-stat-kg" class="text-[10px] text-burgundy mt-0.5">0 KG sold</div></div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">POS Machine</span><div id="sales-stat-pos" class="text-2xl font-black text-burgundy mt-1 font-mono">₦0</div></div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">Cash</span><div id="sales-stat-cash" class="text-2xl font-black text-gray-800 mt-1 font-mono">₦0</div></div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">Bank Transfer</span><div id="sales-stat-transfer" class="text-2xl font-black text-army mt-1 font-mono">₦0</div></div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-bold text-gray-900">Sales History Log</h3>
+        <button onclick="exportCSV()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-army hover:bg-army-dark text-white rounded-lg text-xs font-bold transition"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg><span>Download CSV</span></button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-gray-50 text-gray-500 uppercase text-[10px] border-b border-gray-200"><tr><th class="py-2.5 px-3">Token / Receipt</th><th class="py-2.5 px-3">Time &amp; Date</th><th class="py-2.5 px-3">Cashier</th><th class="py-2.5 px-3">Cylinder</th><th class="py-2.5 px-3">KG</th><th class="py-2.5 px-3">Amount (₦)</th><th class="py-2.5 px-3">Payment</th><th class="py-2.5 px-3 text-center">Reprint</th></tr></thead>
+          <tbody id="sales-table-body" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MANAGEMENT (Manager) ============ -->
+  <div id="view-management" class="space-y-6 hidden">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div><h2 class="font-extrabold text-xl text-gray-900">Management</h2><p class="text-xs text-gray-500 mt-0.5">Record gas purchases and update the selling price per KG.</p></div>
+      <div class="flex items-center space-x-2">
+        <button onclick="openPurchaseModal()" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-army hover:bg-army-dark text-white font-bold text-xs shadow transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg><span>+ Record Gas Purchase</span></button>
+        <button onclick="handleLogout()" class="logout-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg><span>Logout</span></button>
+      </div>
+    </div>
+    <!-- Price card -->
+    <div class="bg-white border-2 border-burgundy-muted rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <span class="text-xs text-gray-500 uppercase font-semibold">Current Selling Price per KG</span>
+        <div id="mgr-current-rate" class="text-4xl font-black text-burgundy font-mono mt-1">₦1,250</div>
+        <p class="text-[11px] text-gray-400 mt-1">All new sales use this rate automatically.</p>
+      </div>
+      <button onclick="openRateModal()" class="flex items-center space-x-2 px-5 py-3 bg-burgundy hover:bg-burgundy-dark text-white rounded-xl font-bold text-sm shadow transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg><span>Update Price / KG</span></button>
+    </div>
+    <!-- Purchases table -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-bold text-gray-900">Gas Purchases from Depot</h3>
+        <span id="mgr-purchase-count" class="text-xs text-gray-400">0 purchases</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-gray-50 text-gray-500 uppercase text-[10px] border-b border-gray-200"><tr><th class="py-2.5 px-3">Date</th><th class="py-2.5 px-3">Supplier</th><th class="py-2.5 px-3">Truck Plate</th><th class="py-2.5 px-3">Waybill #</th><th class="py-2.5 px-3">KG Received</th><th class="py-2.5 px-3">Cost/KG</th><th class="py-2.5 px-3">Total Cost</th></tr></thead>
+          <tbody id="mgr-purchases-tbody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ WORKERS (Manager) ============ -->
+  <div id="view-workers" class="space-y-6 hidden">
+    <div class="flex items-center justify-between">
+      <div><h2 class="font-extrabold text-xl text-gray-900">Workers</h2><p class="text-xs text-gray-500 mt-0.5">Register new cashiers or reset an existing worker's password.</p></div>
+      <button onclick="handleLogout()" class="logout-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg><span>Logout</span></button>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-5">
+      <div class="flex items-center space-x-3 pb-3 border-b border-gray-100">
+        <div class="w-9 h-9 rounded-xl bg-army flex items-center justify-center"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg></div>
+        <div><h3 class="font-bold text-gray-900">Register New Worker</h3><p class="text-xs text-gray-500">Only cashier accounts. Use same username to reset a password.</p></div>
+      </div>
+      <form onsubmit="handleRegisterSubmit(event)" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Full Name <span class="text-red-500">*</span></label><input id="reg-name" type="text" required placeholder="e.g. Amina Bello" autocomplete="off" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-army transition"></div>
+          <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Username <span class="text-red-500">*</span></label><input id="reg-username" type="text" required placeholder="e.g. amina" autocomplete="off" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-army transition"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Shift <span class="text-red-500">*</span></label><select id="reg-role" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-army"><option value="Cashier (Morning)">Morning Cashier</option><option value="Cashier (Evening)">Evening Cashier</option></select></div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Password / PIN <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <input id="reg-password" type="password" required placeholder="Set PIN or password" autocomplete="new-password" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 pr-10 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-army font-mono transition">
+              <button type="button" onclick="toggleEye('reg-password','eye-reg')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-army transition" tabindex="-1">
+                <svg id="eye-reg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Phone Number</label><input id="reg-phone" type="tel" placeholder="08012345678" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-army transition"></div>
+        </div>
+        <div id="reg-error"   class="hidden p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium"></div>
+        <div id="reg-success" class="hidden p-2.5 bg-army-subtle border border-army-muted rounded-xl text-xs text-army font-semibold"></div>
+        <div class="flex items-center space-x-3">
+          <button type="submit" class="px-6 py-2.5 bg-army hover:bg-army-dark text-white font-black rounded-xl text-sm shadow transition active:scale-95">Register Worker</button>
+          <button type="button" onclick="resetRegisterForm()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold rounded-xl text-sm transition">Clear Form</button>
+        </div>
+      </form>
+      <div class="pt-2 border-t border-gray-100 text-[11px] text-gray-400">💡 To reset a worker's password: re-register with the <strong>same username</strong> and a new password.</div>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN DASHBOARD (Owner only) ============ -->
+  <div id="view-admin" class="space-y-6 hidden">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 rounded-xl bg-burgundy flex items-center justify-center shadow"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <div><h2 class="font-extrabold text-xl text-gray-900">Admin Dashboard</h2><p class="text-xs text-gray-500">Owner / Admin — Full Station Overview</p></div>
+      </div>
+      <button onclick="handleLogout()" class="logout-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg><span>Logout</span></button>
+    </div>
+    <!-- Summary -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white border-2 border-burgundy-muted rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">Gas in Tank</span><div id="adm-stat-tank" class="text-2xl font-black text-army mt-1 font-mono">– KG</div><div id="adm-stat-tank-pct" class="text-[10px] text-gray-400 mt-0.5">–</div></div>
+      <div class="bg-white border-2 border-burgundy-muted rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">Today's Revenue</span><div id="adm-stat-revenue-today" class="text-2xl font-black text-gray-900 mt-1 font-mono">₦0</div><div id="adm-stat-kg-today" class="text-[10px] text-burgundy mt-0.5">0 KG sold</div></div>
+      <div class="bg-white border-2 border-burgundy-muted rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">Total Revenue (All-Time)</span><div id="adm-stat-revenue-all" class="text-2xl font-black text-army mt-1 font-mono">₦0</div></div>
+      <div class="bg-white border-2 border-burgundy-muted rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block">Profit Est. (Today)</span><div id="adm-stat-profit" class="text-2xl font-black text-gray-900 mt-1 font-mono">₦0</div><div class="text-[10px] text-gray-400 mt-0.5">Selling − Purchase cost</div></div>
+    </div>
+    <!-- Payment breakdown -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block mb-1">POS Machine (Today)</span><div id="adm-pos-sales" class="text-xl font-black text-burgundy font-mono">₦0</div></div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block mb-1">Cash (Today)</span><div id="adm-cash-sales" class="text-xl font-black text-gray-800 font-mono">₦0</div></div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"><span class="text-[11px] text-gray-500 uppercase font-semibold block mb-1">Bank Transfer (Today)</span><div id="adm-transfer-sales" class="text-xl font-black text-army font-mono">₦0</div></div>
+    </div>
+    <!-- Gas purchases -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100"><h3 class="font-bold text-gray-900">Gas Purchased from Depot</h3><span id="adm-purchase-count" class="text-xs text-gray-400"></span></div>
+      <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-gray-50 text-gray-500 uppercase text-[10px] border-b border-gray-200"><tr><th class="py-2.5 px-3">Date</th><th class="py-2.5 px-3">Supplier</th><th class="py-2.5 px-3">KG Received</th><th class="py-2.5 px-3">Cost/KG</th><th class="py-2.5 px-3">Total Cost</th></tr></thead><tbody id="adm-purchases-tbody" class="divide-y divide-gray-100"></tbody></table></div>
+    </div>
+    <!-- Audit log -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100">
+        <h3 class="font-bold text-gray-900">Full Activity Audit Log</h3>
+        <div class="flex items-center flex-wrap gap-2">
+          <input id="adm-log-search" type="text" oninput="renderAdminLogs()" placeholder="Search…" class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy w-36">
+          <select id="adm-log-filter" onchange="renderAdminLogs()" class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-burgundy">
+            <option value="ALL">All Actions</option>
+            <option value="USER_LOGIN">Logins</option>
+            <option value="USER_LOGOUT">Logouts</option>
+            <option value="SALE_COMPLETED">Sales</option>
+            <option value="GAS_PURCHASED">Purchases</option>
+            <option value="PRICE_CHANGED">Price Changes</option>
+            <option value="USER_REGISTER">Registrations</option>
+          </select>
+          <button onclick="downloadAuditLog()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-lg text-xs font-bold transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>Download CSV</span>
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-gray-50 text-gray-500 uppercase text-[10px] border-b border-gray-200"><tr><th class="py-2.5 px-4">Date &amp; Time</th><th class="py-2.5 px-4">Staff Member</th><th class="py-2.5 px-4">Role</th><th class="py-2.5 px-4">Action</th><th class="py-2.5 px-4">Details</th></tr></thead><tbody id="adm-logs-tbody" class="divide-y divide-gray-100 font-mono text-[11px]"></tbody></table></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===================================================================  MODALS  =================================================================== -->
+
+<!-- Receipt Modal -->
+<div id="modal-receipt" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+  <div class="bg-white border border-gray-200 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+    <div class="flex items-center justify-between pb-3 border-b border-gray-100"><div><h3 class="font-bold text-gray-900">Receipts Ready to Print</h3><p id="receipt-modal-token" class="text-xs text-burgundy font-mono font-bold">TOKEN: –</p></div><button onclick="closeReceiptModal()" class="text-gray-400 hover:text-gray-900 text-xl font-bold">✕</button></div>
+    <div class="max-h-[60vh] overflow-y-auto bg-gray-50 p-3 rounded-xl border border-gray-200 flex justify-center">
+      <div id="printable-receipt-container" class="w-[300px] bg-white text-black p-3 font-mono text-[11px] leading-snug shadow border border-gray-200">
+        <div class="text-center pb-2 border-b border-dashed border-gray-400"><div id="receipt-station-name" class="font-black text-[13px] uppercase">LPG COOKING GAS STATION</div><div id="receipt-station-address" class="text-[9px] text-gray-600">Refilling Station</div><div class="mt-1 text-[10px] font-bold bg-gray-200 py-0.5 rounded">*** CUSTOMER RECEIPT ***</div></div>
+        <div class="py-1.5 space-y-0.5 border-b border-dashed border-gray-300 text-[10px]"><div class="flex justify-between"><span>Receipt #:</span><span id="receipt-order-no" class="font-bold">–</span></div><div class="flex justify-between"><span>Cashier:</span><span id="receipt-cashier-name" class="font-bold">–</span></div><div class="flex justify-between"><span>Date/Time:</span><span id="receipt-datetime">–</span></div><div class="flex justify-between"><span>Payment:</span><span id="receipt-payment" class="font-bold">–</span></div></div>
+        <div class="py-2 border-b border-dashed border-gray-400"><div class="flex justify-between font-black text-[13px]"><span id="receipt-spec">–</span><span id="receipt-total">–</span></div><div class="text-[9px] text-gray-600" id="receipt-rate-calc"></div></div>
+        <div class="text-center py-1.5 text-[9px] text-gray-600">Thank you for cooking with us! Keep cylinder upright.</div>
+        <div class="my-3 py-1.5 border-y-2 border-dashed border-black text-center font-bold text-[9px] uppercase bg-gray-100">✂ ✂ ✂ &nbsp; TEAR HERE &nbsp; ✂ ✂ ✂</div>
+        <div class="text-center pb-2 border-b border-dashed border-gray-400"><div class="text-[11px] font-black uppercase bg-black text-white py-0.5 rounded">DISPENSER REFILL SLIP</div></div>
+        <div class="my-2 p-2 bg-gray-100 border border-gray-300 rounded text-center"><div class="text-[9px] uppercase font-bold text-gray-600">REFILL TOKEN:</div><div id="receipt-slip-token" class="text-[24px] font-black text-black">–</div></div>
+        <div class="py-1.5 space-y-1 border-b border-dashed border-gray-400 text-[11px]"><div class="flex justify-between text-[14px] font-black bg-yellow-100 p-1 border border-yellow-300 rounded"><span>REFILL WEIGHT:</span><span id="receipt-slip-kg" class="underline">– KG</span></div><div class="flex justify-between text-[10px]"><span>Receipt Ref:</span><span id="receipt-slip-ref">–</span></div></div>
+        <div class="pt-2 text-center text-[8px] text-gray-500 italic">Worker: Key exact weight into dispenser &amp; check for gas leaks.</div>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2"><button onclick="printReceipt()" class="flex-1 py-3 bg-burgundy hover:bg-burgundy-dark text-white font-black rounded-xl text-sm shadow-lg transition">🖨 Print 2 Receipts</button><button onclick="closeReceiptModal()" class="py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-semibold">Close</button></div>
+  </div>
+</div>
+
+<!-- Purchase Modal -->
+<div id="modal-purchase" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+  <div class="bg-white border border-gray-200 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+    <div class="flex items-center justify-between pb-3 border-b border-gray-100"><h3 class="font-bold text-gray-900">Record Bulk Gas Purchase</h3><button onclick="closePurchaseModal()" class="text-gray-400 hover:text-gray-900 font-bold text-lg">✕</button></div>
+    <form onsubmit="handlePurchaseSubmit(event)" class="space-y-3">
+      <div><label class="block text-xs font-semibold text-gray-700 mb-1">Quantity Received (KG) *</label><input id="purchase-kg" type="number" step="1" required placeholder="e.g. 3500" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-lg font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-army font-mono"><p class="text-[10px] text-gray-400 mt-1">1 Metric Ton = 1,000 KG</p></div>
+      <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-700 mb-1">Supplier / Depot *</label><input id="purchase-supplier" type="text" required placeholder="e.g. NNPC" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-army"></div><div><label class="block text-xs font-semibold text-gray-700 mb-1">Truck Plate</label><input id="purchase-truck" type="text" placeholder="e.g. KMC-102-XA" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-army"></div></div>
+      <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-semibold text-gray-700 mb-1">Waybill Number</label><input id="purchase-waybill" type="text" placeholder="WB-9921" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-army"></div><div><label class="block text-xs font-semibold text-gray-700 mb-1">Cost per KG (₦)</label><input id="purchase-cost" type="number" value="1050" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-army"></div></div>
+      <div class="flex justify-end space-x-2 pt-2"><button type="button" onclick="closePurchaseModal()" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-xs font-semibold">Cancel</button><button type="submit" class="px-5 py-2 bg-army hover:bg-army-dark text-white font-black rounded-xl text-xs shadow-lg">Add to Tank</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Rate Modal -->
+<div id="modal-rate" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+  <div class="bg-white border border-gray-200 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+    <div class="flex items-center justify-between pb-2 border-b border-gray-100"><h3 class="font-bold text-gray-900">Update Gas Price / KG</h3><button onclick="closeRateModal()" class="text-gray-400 hover:text-gray-900 font-bold text-lg">✕</button></div>
+    <form onsubmit="handleRateSubmit(event)" class="space-y-4">
+      <div><label class="block text-xs font-semibold text-burgundy mb-1.5">New Price per KG (₦):</label><div class="relative"><span class="absolute left-3.5 top-2.5 text-xl font-bold text-burgundy">₦</span><input id="input-new-rate" type="number" required min="100" class="w-full bg-gray-50 border-2 border-burgundy rounded-xl pl-8 pr-16 py-2.5 text-2xl font-black text-gray-900 font-mono focus:outline-none focus:ring-2 focus:ring-burgundy"><span class="absolute right-3.5 top-3 text-xs text-gray-400">/ KG</span></div></div>
+      <div class="flex justify-end space-x-2"><button type="button" onclick="closeRateModal()" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-xs font-semibold">Cancel</button><button type="submit" class="px-5 py-2 bg-burgundy hover:bg-burgundy-dark text-white font-black rounded-xl text-xs">Save Rate</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================================================================
+     SECRET STATION MASTER SETUP MODAL (Owner & Manager Only)
+=================================================================== -->
+<div id="modal-secret-setup" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden">
+  <div class="bg-white border-2 border-burgundy rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-burgundy flex items-center justify-center text-white shadow">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-gray-900 text-base">Station Master Setup</h3>
+          <p class="text-[11px] text-gray-500">Register Station Owner or General Manager</p>
+        </div>
+      </div>
+      <button onclick="closeSecretSetupModal()" class="text-gray-400 hover:text-gray-900 font-bold text-xl">✕</button>
+    </div>
+
+    <form onsubmit="handleSecretSetupSubmit(event)" class="space-y-3.5 text-xs">
+      <div>
+        <label class="block font-semibold text-burgundy mb-1">Station Master Passcode *</label>
+        <div class="relative">
+          <input id="secret-master-pass" type="password" required placeholder="Enter Station Master Key (e.g. GASFLOW-2026)" autocomplete="off"
+            class="w-full bg-burgundy-subtle border border-burgundy-muted rounded-xl px-3.5 py-2.5 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy font-mono text-xs">
+          <button type="button" onclick="toggleEye('secret-master-pass','eye-secret-master')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-burgundy" tabindex="-1">
+            <svg id="eye-secret-master" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </button>
+        </div>
+        <p class="text-[10px] text-gray-400 mt-0.5">Default Master Passcode: <span class="font-mono text-gray-600 font-bold">GASFLOW-2026</span></p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Full Name *</label>
+          <input id="secret-name" type="text" required placeholder="e.g. Alhaji Sanusi" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy">
+        </div>
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Username *</label>
+          <input id="secret-username" type="text" required placeholder="e.g. sanusi" autocomplete="off" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Executive Account Role *</label>
+          <select id="secret-role" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy font-medium">
+            <option value="Owner / Admin">👑 Station Owner (Admin Dashboard Only)</option>
+            <option value="Manager">💼 General Manager (Cashier, Records, Mgmt, Workers)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Password / PIN *</label>
+          <div class="relative">
+            <input id="secret-password" type="password" required placeholder="••••••" autocomplete="new-password" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy font-mono">
+            <button type="button" onclick="toggleEye('secret-password','eye-secret-pass')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-burgundy" tabindex="-1">
+              <svg id="eye-secret-pass" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">Phone Number</label>
+        <input id="secret-phone" type="tel" placeholder="08031234567" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy">
+      </div>
+
+      <div id="secret-error" class="hidden p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium"></div>
+      <div id="secret-success" class="hidden p-2.5 bg-army-subtle border border-army-muted rounded-xl text-xs text-army font-bold"></div>
+
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeSecretSetupModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl">Cancel</button>
+        <button type="submit" class="px-5 py-2 bg-burgundy hover:bg-burgundy-dark text-white font-bold rounded-xl shadow transition">Register Executive Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

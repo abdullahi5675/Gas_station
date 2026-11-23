@@ -61,74 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
-// LANDING PAGE CALCULATOR & PRESENTATION
+// LANDING PAGE PRESENTATION
 // ============================================================
-let landingCalcKg = 12.5;
-
-function setLandingCalcKg(kg) {
-  landingCalcKg = Number(kg);
-  const input = document.getElementById('landing-custom-kg');
-  if (input) input.value = '';
-
-  // Update UI buttons
-  document.querySelectorAll('.landing-calc-btn').forEach(btn => {
-    const bkg = Number(btn.getAttribute('data-kg'));
-    if (bkg === landingCalcKg) {
-      btn.className = 'landing-calc-btn relative p-3.5 rounded-2xl border-2 border-burgundy bg-burgundy-subtle text-left transition ring-2 ring-burgundy/20';
-    } else {
-      btn.className = 'landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition';
-    }
-  });
-
-  recalculateLandingTotal();
-}
-
-function onLandingCustomKgInput() {
-  const input = document.getElementById('landing-custom-kg');
-  const val = Number(input?.value);
-  if (val && val > 0) {
-    landingCalcKg = val;
-    // Unselect presets
-    document.querySelectorAll('.landing-calc-btn').forEach(btn => {
-      btn.className = 'landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition';
-    });
-    recalculateLandingTotal();
-  }
-}
-
-function recalculateLandingTotal() {
-  const rate = state.pricePerKg || 1250;
-  const total = Math.round(landingCalcKg * rate);
-  safeSet('landing-calc-total', '₦' + total.toLocaleString());
-  safeSet('landing-calc-kg-summary', landingCalcKg.toString());
-}
-
 function updateLandingUI(overview) {
   if (!overview) return;
-  const stationName = overview.station?.name || "Al-Barakah Modern LPG Gas Station";
   const rate = overview.settings?.pricePerKg || state.pricePerKg || 1250;
-  const stock = overview.tank?.currentStockKg || 4000;
-  const address = overview.station?.address || "Plot 14, Commercial Avenue, Bypass Road";
-  const phone = overview.station?.phone || "+234 803 123 4567";
-  const rc = overview.station?.rcNumber || "RC: 1849204";
+  const stock = Math.round(overview.tank?.currentStockKg || 4000);
 
-  safeSet('landing-station-name', stationName);
-  safeSet('landing-price-display', '₦' + rate.toLocaleString());
-  safeSet('landing-tank-display', stock.toLocaleString());
-  safeSet('calc-rate-badge', '₦' + rate.toLocaleString() + ' / KG');
-  safeSet('landing-address', address + (overview.station?.city ? ', ' + overview.station.city : ''));
-  safeSet('landing-phone', phone);
-  safeSet('landing-rc', rc + ' • Licensed LPG Dispensing Plant');
+  safeSet('landing-price-display', `₦${rate.toLocaleString()}`);
+  safeSet('landing-tank-display', `${stock.toLocaleString()} KG`);
+}
 
-  // Update preset prices on landing page
-  document.querySelectorAll('[data-calc-price]').forEach(el => {
-    const kg = Number(el.getAttribute('data-calc-price'));
-    if (kg) {
-      el.textContent = '₦' + (Math.round(kg * rate)).toLocaleString();
-    }
-  });
-
-  recalculateLandingTotal();
+function showLandingPageFromLogin() {
+  hideAuthOverlay();
+  switchTab('landing');
 }
 
 // ============================================================
@@ -201,9 +147,23 @@ async function handleLoginSubmit(e) {
   }
 }
 
-async function handleLogout() {
-  if (!confirm(`Are you sure you want to log out, ${state.currentUser?.name || 'Staff'}?`)) return;
+// Custom in-app logout modal
+function handleLogout() {
+  const modal = document.getElementById('modal-logout-confirm');
+  const confirmText = document.getElementById('logout-confirm-text');
+  if (confirmText) {
+    confirmText.textContent = `Are you sure you want to end your session, ${state.currentUser?.name || 'Staff'}? Your shift actions have been saved to the audit trail.`;
+  }
+  if (modal) modal.classList.remove('hidden');
+}
 
+function closeLogoutModal() {
+  const modal = document.getElementById('modal-logout-confirm');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function confirmLogoutAction() {
+  closeLogoutModal();
   try {
     await fetch('/api/auth/logout', {
       method: 'POST',
@@ -217,7 +177,8 @@ async function handleLogout() {
   state.pendingOrder = null;
   updateUserHeader();
   buildNav();
-  switchTab('landing');
+  switchTab('landing'); // sets background
+  showAuthOverlay();    // redirects straight to login page as requested!
   loadLogs();
 }
 
@@ -274,14 +235,12 @@ function buildNav() {
   nav.innerHTML = '';
 
   if (!state.currentUser) {
-    // Visitor navigation
-    nav.appendChild(makeNavBtn('landing', '🏠 Station Overview & Price Calculator'));
+    // Visitor navigation when not logged in
+    nav.appendChild(makeNavBtn('landing', '🏢 Station Operations Portal'));
     return;
   }
 
-  // Logged-in Navigation
-  nav.appendChild(makeNavBtn('landing', '🏠 Public Overview'));
-
+  // Inside logged-in accounts: NO landing page button!
   if (isOwner()) {
     // Owner only sees Admin Dashboard
     nav.appendChild(makeNavBtn('admin', '📊 Admin Dashboard'));

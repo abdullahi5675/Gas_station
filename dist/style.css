@@ -63,6 +63,27 @@ body {
   transform: scale(0.97);
 }
 
+/* ===== MOBILE & RESPONSIVE TWEAKS ===== */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth mobile touch scrolling */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Touch friendly button targets on mobile */
+@media (max-width: 640px) {
+  button, input, select {
+    touch-action: manipulation;
+  }
+}
+
 /* ===== PRINT STYLES ===== */
 @media print {
   /* Hide everything */

@@ -84,11 +84,15 @@
         </div>
       </div>
 
-      <!-- Secret Executive Setup Trigger -->
-      <div class="pt-2 border-t border-gray-100 text-center">
-        <button type="button" onclick="openSecretSetupModal()" class="text-[11px] text-gray-400 hover:text-burgundy flex items-center justify-center space-x-1.5 mx-auto font-medium transition" title="Restricted to Station Owner and General Manager">
-          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-          <span>Station Master Setup (Owner &amp; Manager)</span>
+      <!-- Secret Executive Setup Trigger & Portal Overview -->
+      <div class="pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+        <button type="button" onclick="hideAuthOverlay()" class="text-army hover:text-army-dark font-bold flex items-center space-x-1 transition" title="View Station Portal Overview">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Station Overview</span>
+        </button>
+        <button type="button" onclick="openSecretSetupModal()" class="text-gray-400 hover:text-burgundy flex items-center space-x-1 font-medium transition" title="Restricted to Station Owner and General Manager">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          <span>Executive Key</span>
         </button>
       </div>
     </form>
@@ -98,297 +102,190 @@
 
 <!-- ===================================================================
      TOP HEADER
-=================================================================== -->
+================================================================== -->
 <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+  <div class="max-w-6xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
     <!-- Brand -->
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 rounded-xl bg-burgundy flex items-center justify-center shadow">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-burgundy flex items-center justify-center shadow">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
         </svg>
       </div>
       <div>
-        <span class="font-extrabold text-base text-gray-900">GasFlow</span>
-        <span class="ml-2 text-[10px] bg-army-subtle text-army font-bold px-2 py-0.5 rounded-full border border-army-muted">LPG STATION</span>
+        <span class="font-extrabold text-sm sm:text-base text-gray-900">GasFlow</span>
+        <span class="ml-1 sm:ml-2 text-[9px] sm:text-[10px] bg-army-subtle text-army font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-army-muted">LPG STATION</span>
       </div>
     </div>
 
     <!-- Centre: Rate + Tank -->
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
       <div id="nav-rate-pill" onclick="openRateModal()" title="Update price (Manager only)"
-        class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-burgundy-subtle border border-burgundy-muted hover:border-burgundy cursor-pointer transition text-xs">
-        <div class="w-2 h-2 rounded-full bg-burgundy animate-pulse"></div>
-        <span class="text-gray-500">Rate:</span>
+        class="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-burgundy-subtle border border-burgundy-muted hover:border-burgundy cursor-pointer transition text-[11px] sm:text-xs">
+        <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-burgundy animate-pulse"></div>
+        <span class="text-gray-500 hidden sm:inline">Rate:</span>
         <span id="nav-price-per-kg" class="font-extrabold text-burgundy font-mono">₦1,250</span>
         <span class="text-gray-400">/kg</span>
       </div>
-      <div class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-army-subtle border border-army-muted text-xs">
-        <span class="text-gray-500">Tank:</span>
+      <div class="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-army-subtle border border-army-muted text-[11px] sm:text-xs">
+        <span class="text-gray-500 hidden sm:inline">Tank:</span>
         <span id="nav-tank-stock" class="font-extrabold text-army font-mono">– KG</span>
       </div>
     </div>
 
     <!-- Right: Auth / User info -->
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
       <!-- When Logged Out -->
-      <button id="nav-btn-signin" onclick="showAuthOverlay()" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-burgundy hover:bg-burgundy-dark text-white text-xs font-bold rounded-xl shadow transition active:scale-95">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-        <span>Staff Sign In</span>
+      <button id="nav-btn-signin" onclick="showAuthOverlay()" class="flex items-center space-x-1 sm:space-x-1.5 px-3 sm:px-3.5 py-1.5 bg-burgundy hover:bg-burgundy-dark text-white text-xs font-bold rounded-xl shadow transition active:scale-95">
+        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        <span>Sign In</span>
       </button>
 
       <!-- When Logged In -->
-      <div id="nav-user-badge" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
+      <div id="nav-user-badge" class="hidden sm:flex items-center space-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
         <div class="w-2 h-2 rounded-full bg-army animate-pulse"></div>
         <div>
           <div id="nav-current-user-name" class="font-bold text-gray-900 leading-tight">–</div>
           <div id="nav-current-user-role" class="text-[10px] text-gray-400 leading-none">–</div>
         </div>
       </div>
-      <button id="nav-btn-logout" onclick="handleLogout()" class="hidden px-2.5 py-1.5 text-xs text-gray-500 hover:text-burgundy hover:bg-burgundy-subtle rounded-xl border border-gray-200 transition font-medium" title="Log out">
+      <button id="nav-btn-logout" onclick="handleLogout()" class="hidden px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs text-gray-500 hover:text-burgundy hover:bg-burgundy-subtle rounded-xl border border-gray-200 transition font-medium" title="Log out">
         Logout
       </button>
     </div>
   </div>
 
   <!-- NAV TABS -->
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 border-t border-gray-100 py-1.5 flex items-center justify-between">
-    <nav id="main-nav" class="flex items-center space-x-1"></nav>
-    <span id="nav-station-name" class="text-[11px] text-gray-400 hidden md:block truncate max-w-xs"></span>
+  <div class="max-w-6xl mx-auto px-3 sm:px-6 border-t border-gray-100 py-1.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+    <nav id="main-nav" class="flex items-center space-x-1.5 whitespace-nowrap"></nav>
+    <span id="nav-station-name" class="text-[11px] text-gray-400 hidden lg:block truncate max-w-xs flex-shrink-0"></span>
   </div>
 </header>
 
 <!-- ===================================================================
      MAIN
 =================================================================== -->
-<main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+<main class="max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
 
-  <!-- ============ LANDING PAGE (Public Station Overview) ============ -->
-  <div id="view-landing" class="space-y-12">
-    <!-- Hero Section -->
-    <div class="relative bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm overflow-hidden">
-      <!-- Background decorative tint -->
-      <div class="absolute -top-24 -right-24 w-96 h-96 bg-burgundy/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-army/5 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div class="relative z-10 max-w-3xl space-y-6">
-        <!-- Status Pill -->
+  <!-- ============ INTERNAL STATION PORTAL LANDING PAGE ============ -->
+  <div id="view-landing" class="space-y-6 sm:space-y-8">
+    <!-- Hero / Welcome Station Hub -->
+    <div class="relative bg-white border border-gray-200 rounded-3xl p-5 sm:p-8 lg:p-10 shadow-sm overflow-hidden">
+      <div class="relative z-10 max-w-3xl space-y-4 sm:space-y-6">
+        <!-- Internal Badge -->
         <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-army-subtle border border-army-muted text-xs text-army font-bold">
           <span class="w-2 h-2 rounded-full bg-army animate-pulse"></span>
-          <span>Station Operational • Certified Digital Dispensing Plant</span>
+          <span>Internal Station Operations &amp; POS Terminal</span>
         </div>
 
-        <h1 class="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight leading-tight">
-          Safe, Accurate &amp; Transparent <br class="hidden sm:inline" />
-          <span class="text-burgundy">LPG Cooking Gas Refilling</span>
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-tight">
+          Al-Barakah Modern LPG <br class="hidden sm:inline" />
+          <span class="text-burgundy">Station Management System</span>
         </h1>
 
-        <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-2xl">
-          Welcome to <strong class="text-gray-900" id="landing-station-name">Al-Barakah Modern LPG Gas Station</strong>. We deliver calibrated, precision-metered cooking gas refilling with automatic tare deduction, tamper-proof security tokens, and instant dual thermal receipts.
+        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-2xl">
+          Authorized workstation for station cashiers, plant managers, and executive oversight. Manage digital cylinder dispensing, track depot bulk LPG deliveries, and reconcile shift transactions with full transparency.
         </p>
 
-        <!-- CTA Buttons -->
-        <div class="flex flex-wrap items-center gap-3 pt-2">
-          <button onclick="showAuthOverlay()" class="px-6 py-3.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-2xl font-black text-sm shadow-lg shadow-burgundy/20 transition active:scale-95 flex items-center space-x-2">
+        <!-- Main Action: Enter Shift / Sign In -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+          <button onclick="showAuthOverlay()" class="w-full sm:w-auto px-6 py-3.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-2xl font-black text-sm shadow-lg shadow-burgundy/25 transition active:scale-95 flex items-center justify-center space-x-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-            <span>Staff &amp; Station Portal</span>
+            <span>Sign In to Station Terminal</span>
           </button>
-          <a href="#landing-calc" class="px-6 py-3.5 bg-army-subtle hover:bg-army-muted text-army border border-army-muted rounded-2xl font-bold text-sm transition active:scale-95 flex items-center space-x-2">
-            <svg class="w-5 h-5 text-army" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            <span>Check Gas Price Calculator</span>
-          </a>
+          <div class="text-[11px] text-gray-400 flex items-center justify-center sm:justify-start space-x-1.5 py-1">
+            <span>🔒 Protected Station Workstation</span>
+            <span>•</span>
+            <span>Shift Audit Active</span>
+          </div>
         </div>
       </div>
 
-      <!-- Quick Metrics Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-gray-100">
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
-          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-            <span class="text-base">⛽</span>
-            <span>Current Retail Price</span>
-          </div>
-          <div class="mt-2 text-3xl font-black text-burgundy font-mono"><span id="landing-price-display">₦1,250</span> <span class="text-xs font-semibold text-gray-400">/ KG</span></div>
-          <p class="text-[11px] text-gray-400 mt-1">Guaranteed uniform price across all islands</p>
+      <!-- Station Live Operational Status Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-100">
+        <div class="p-3.5 sm:p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider block">Selling Price / KG</span>
+          <div class="mt-1 text-xl sm:text-2xl lg:text-3xl font-black text-burgundy font-mono" id="landing-price-display">₦1,250</div>
+          <span class="text-[10px] text-gray-400 block mt-0.5">Active retail rate</span>
         </div>
 
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
-          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-            <span class="text-base">🛢️</span>
-            <span>Station Tank Stock</span>
-          </div>
-          <div class="mt-2 text-3xl font-black text-army font-mono"><span id="landing-tank-display">4,000</span> <span class="text-xs font-semibold text-gray-400">KG</span></div>
-          <p class="text-[11px] text-gray-400 mt-1">Active bulk reserve • Uninterrupted refill</p>
+        <div class="p-3.5 sm:p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider block">Skid Tank Stock</span>
+          <div class="mt-1 text-xl sm:text-2xl lg:text-3xl font-black text-army font-mono" id="landing-tank-display">4,000 KG</div>
+          <span class="text-[10px] text-gray-400 block mt-0.5">Bulk LPG inventory</span>
         </div>
 
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl">
-          <div class="flex items-center space-x-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-            <span class="text-base">⏱️</span>
-            <span>Operating Hours</span>
+        <div class="p-3.5 sm:p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider block">Dispenser Islands</span>
+          <div class="mt-1 text-sm sm:text-base font-bold text-gray-900 flex items-center space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-army"></span>
+            <span>Islands 1 &amp; 2 Active</span>
           </div>
-          <div class="mt-2 text-2xl font-black text-gray-900">7:00 AM – 9:00 PM</div>
-          <p class="text-[11px] text-gray-400 mt-1">Open 7 days a week (Monday – Sunday)</p>
+          <span class="text-[10px] text-gray-400 block mt-0.5">Calibrated digital scales</span>
+        </div>
+
+        <div class="p-3.5 sm:p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+          <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider block">Operating Hours</span>
+          <div class="mt-1 text-sm sm:text-base font-bold text-gray-900">7:00 AM – 9:00 PM</div>
+          <span class="text-[10px] text-gray-400 block mt-0.5">Morning &amp; Evening Shifts</span>
         </div>
       </div>
     </div>
 
-    <!-- Live Customer Cylinder Price Calculator -->
-    <div id="landing-calc" class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100 gap-2">
+    <!-- Operating Protocols & Safety Checklist (Internal Company) -->
+    <div class="bg-white border border-gray-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-4">
+      <div class="pb-3 border-b border-gray-100 flex items-center justify-between">
         <div>
-          <span class="text-xs font-bold text-burgundy uppercase tracking-wider">Interactive Tool</span>
-          <h2 class="text-2xl font-black text-gray-900 mt-0.5">Live Cylinder Refill Price Calculator</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Select a standard cylinder size or enter custom weight to see the exact price.</p>
+          <h2 class="text-base sm:text-lg font-black text-gray-900">Station Standard Operating Procedures (SOP)</h2>
+          <p class="text-xs text-gray-500">Mandatory operating guidelines for on-duty cashiers and dispenser attendants.</p>
         </div>
-        <div class="text-left sm:text-right">
-          <span class="text-[11px] text-gray-400 block">Current Selling Rate:</span>
-          <span id="calc-rate-badge" class="text-lg font-black text-burgundy font-mono">₦1,250 / KG</span>
-        </div>
+        <span class="text-xs font-bold text-army bg-army-subtle px-2.5 py-1 rounded-lg border border-army-muted hidden sm:inline-block">Compliance Active</span>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        <!-- Left: Presets & Controls -->
-        <div class="lg:col-span-7 space-y-5">
-          <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Select Standard Cylinder</label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <button type="button" onclick="setLandingCalcKg(3)"    class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="3">
-              <div class="text-xl font-black text-gray-900">3 KG</div>
-              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="3">₦3,750</div>
-            </button>
-            <button type="button" onclick="setLandingCalcKg(5)"    class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="5">
-              <div class="text-xl font-black text-gray-900">5 KG</div>
-              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="5">₦6,250</div>
-            </button>
-            <button type="button" onclick="setLandingCalcKg(6)"    class="landing-calc-btn relative p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="6">
-              <span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">POPULAR</span>
-              <div class="text-xl font-black text-gray-900">6 KG</div>
-              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="6">₦7,500</div>
-            </button>
-            <button type="button" onclick="setLandingCalcKg(10)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="10">
-              <div class="text-xl font-black text-gray-900">10 KG</div>
-              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="10">₦12,500</div>
-            </button>
-            <button type="button" onclick="setLandingCalcKg(12.5)" class="landing-calc-btn relative p-3.5 rounded-2xl border-2 border-burgundy bg-burgundy-subtle text-left transition ring-2 ring-burgundy/20" data-kg="12.5">
-              <span class="absolute -top-2 right-2 bg-burgundy text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">STANDARD</span>
-              <div class="text-xl font-black text-gray-900">12.5 KG</div>
-              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="12.5">₦15,625</div>
-            </button>
-            <button type="button" onclick="setLandingCalcKg(25)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="25">
-              <div class="text-xl font-black text-gray-900">25 KG</div>
-              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="25">₦31,250</div>
-            </button>
-            <button type="button" onclick="setLandingCalcKg(50)"   class="landing-calc-btn p-3.5 rounded-2xl border border-gray-200 bg-gray-50 hover:border-burgundy hover:bg-burgundy-subtle text-left transition" data-kg="50">
-              <div class="text-xl font-black text-gray-900">50 KG</div>
-              <div class="text-xs font-bold text-burgundy mt-1" data-calc-price="50">₦62,500</div>
-            </button>
-          </div>
-
-          <!-- Custom KG or Custom Amount Toggle -->
-          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
-            <span class="text-xs font-bold text-gray-600 block">Or Enter Any Custom Weight:</span>
-            <div class="relative">
-              <input type="number" id="landing-custom-kg" step="0.5" min="0.5" oninput="onLandingCustomKgInput()" placeholder="e.g. 7.5"
-                class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-lg font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-burgundy pr-16 font-mono">
-              <span class="absolute right-4 top-3.5 text-gray-400 font-bold text-sm">KG</span>
-            </div>
-          </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 space-y-2">
+          <div class="w-8 h-8 rounded-xl bg-burgundy-subtle text-burgundy font-black text-xs flex items-center justify-center">01</div>
+          <h3 class="font-bold text-xs sm:text-sm text-gray-900">Tare Weight Verification</h3>
+          <p class="text-[11px] text-gray-500 leading-relaxed">
+            Every cylinder must be placed on the digital load-cell and tared to 0.00 KG before injecting gas.
+          </p>
         </div>
 
-        <!-- Right: Calculated Result Card -->
-        <div class="lg:col-span-5">
-          <div class="bg-gray-50 border-2 border-burgundy-muted rounded-3xl p-6 text-center space-y-4">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Estimated Refill Price</span>
-            <div class="text-4xl sm:text-5xl font-black text-army font-mono tracking-tight" id="landing-calc-total">₦15,625</div>
-            
-            <div class="inline-flex items-center space-x-2 px-3 py-1 bg-burgundy-subtle border border-burgundy-muted rounded-full text-xs font-bold text-burgundy">
-              <span>Weight:</span>
-              <span id="landing-calc-kg-summary">12.5</span>
-              <span>KG Net Gas</span>
-            </div>
+        <div class="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 space-y-2">
+          <div class="w-8 h-8 rounded-xl bg-army-subtle text-army font-black text-xs flex items-center justify-center">02</div>
+          <h3 class="font-bold text-xs sm:text-sm text-gray-900">Valve Seal Inspection</h3>
+          <p class="text-[11px] text-gray-500 leading-relaxed">
+            Attendants must visually check cylinder neck rubber O-rings and test for pin leaks before refilling.
+          </p>
+        </div>
 
-            <p class="text-xs text-gray-500 leading-relaxed pt-2 border-t border-gray-200">
-              100% tare deducted. You pay strictly for pure cooking gas with zero cylinder weight included.
-            </p>
+        <div class="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 space-y-2">
+          <div class="w-8 h-8 rounded-xl bg-burgundy-subtle text-burgundy font-black text-xs flex items-center justify-center">03</div>
+          <h3 class="font-bold text-xs sm:text-sm text-gray-900">Dual Security Receipts</h3>
+          <p class="text-[11px] text-gray-500 leading-relaxed">
+            Cashier hands official customer copy and issues the dispenser slip with the verified security token.
+          </p>
+        </div>
 
-            <button onclick="showAuthOverlay()" class="w-full py-3.5 bg-burgundy hover:bg-burgundy-dark text-white font-black text-sm rounded-2xl shadow transition active:scale-95 flex items-center justify-center space-x-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-              <span>Cashier / Staff Sign In</span>
-            </button>
-          </div>
+        <div class="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 space-y-2">
+          <div class="w-8 h-8 rounded-xl bg-army-subtle text-army font-black text-xs flex items-center justify-center">04</div>
+          <h3 class="font-bold text-xs sm:text-sm text-gray-900">Shift Reconciliation</h3>
+          <p class="text-[11px] text-gray-500 leading-relaxed">
+            Count cash drawer, balance POS card terminal slips, and confirm bank transfer references before sign-out.
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- 4 Pillars of Al-Barakah LPG -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
-        <div class="w-12 h-12 rounded-2xl bg-burgundy-subtle border border-burgundy-muted flex items-center justify-center text-2xl">⚖️</div>
-        <h3 class="font-extrabold text-base text-gray-900">Zero-Tare Accuracy</h3>
-        <p class="text-xs text-gray-500 leading-relaxed">
-          Our calibrated digital load cells deduct the cylinder's tare weight automatically. You receive 100% of the gas you pay for.
-        </p>
+    <!-- Station Details & Staff Help -->
+    <div class="bg-white border border-gray-200 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="text-xs font-bold text-gray-900">Al-Barakah Modern LPG Gas Station &amp; Plant</div>
+        <div class="text-[11px] text-gray-500">Plot 14, Commercial Avenue, Bypass Road • RC: 1849204</div>
       </div>
-
-      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
-        <div class="w-12 h-12 rounded-2xl bg-army-subtle border border-army-muted flex items-center justify-center text-2xl">🧾</div>
-        <h3 class="font-extrabold text-base text-gray-900">Dual Security Receipts</h3>
-        <p class="text-xs text-gray-500 leading-relaxed">
-          Every transaction prints a customer receipt plus a dispenser refill slip with a unique security token code for dispenser verification.
-        </p>
-      </div>
-
-      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
-        <div class="w-12 h-12 rounded-2xl bg-burgundy-subtle border border-burgundy-muted flex items-center justify-center text-2xl">🛡️</div>
-        <h3 class="font-extrabold text-base text-gray-900">Certified Safety Checks</h3>
-        <p class="text-xs text-gray-500 leading-relaxed">
-          Attendants inspect cylinder neck valves, rubber rings, and test for pin leaks before refilling to safeguard your family and property.
-        </p>
-      </div>
-
-      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-3">
-        <div class="w-12 h-12 rounded-2xl bg-army-subtle border border-army-muted flex items-center justify-center text-2xl">💳</div>
-        <h3 class="font-extrabold text-base text-gray-900">Instant Payments</h3>
-        <p class="text-xs text-gray-500 leading-relaxed">
-          Seamlessly pay with card on our high-speed POS terminals, verified instant bank transfer, or cash at the cashier island.
-        </p>
-      </div>
-    </div>
-
-    <!-- Staff Portal Access Banner -->
-    <div class="bg-gradient-to-r from-army-subtle via-white to-burgundy-subtle border border-gray-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
-      <div class="space-y-2 text-center sm:text-left">
-        <div class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-burgundy text-white text-[11px] font-bold">
-          <span>🔐</span>
-          <span>Station Staff &amp; Executive Access</span>
-        </div>
-        <h3 class="text-xl sm:text-2xl font-black text-gray-900">Operating System &amp; Shift Management</h3>
-        <p class="text-xs text-gray-600 max-w-xl">
-          Authorized cashiers, station managers, and the station owner can access their dedicated refilling terminal, depot records, and financial overview.
-        </p>
-      </div>
-      <button onclick="showAuthOverlay()" class="flex-shrink-0 px-6 py-3.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-2xl font-black text-sm shadow-lg shadow-burgundy/25 transition active:scale-95 flex items-center space-x-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-        <span>Sign In to System</span>
+      <button onclick="showAuthOverlay()" class="w-full sm:w-auto px-5 py-2.5 bg-burgundy hover:bg-burgundy-dark text-white rounded-xl font-bold text-xs shadow transition active:scale-95">
+        Staff Sign In →
       </button>
-    </div>
-
-    <!-- Station Location & Details Footer -->
-    <div class="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <h4 class="font-extrabold text-sm text-gray-900 mb-2">📍 Station Location</h4>
-          <p class="text-xs text-gray-600 leading-relaxed" id="landing-address">Plot 14, Commercial Avenue, Bypass Road, Kano / Abuja</p>
-        </div>
-        <div>
-          <h4 class="font-extrabold text-sm text-gray-900 mb-2">📞 Contact &amp; Deliveries</h4>
-          <p class="text-xs text-gray-600" id="landing-phone">+234 803 123 4567</p>
-          <p class="text-xs text-gray-400 mt-1">Bulk refill &amp; corporate inquiries welcome.</p>
-        </div>
-        <div>
-          <h4 class="font-extrabold text-sm text-gray-900 mb-2">🛡️ Plant Compliance</h4>
-          <p class="text-xs text-gray-600" id="landing-rc">RC: 1849204 • NMDPRA Standard Compliant</p>
-          <p class="text-xs text-gray-400 mt-1">GasFlow Plant POS System v1.0</p>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -765,6 +662,33 @@
         <button type="submit" class="px-5 py-2 bg-burgundy hover:bg-burgundy-dark text-white font-bold rounded-xl shadow transition">Register Executive Account</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ===================================================================
+     CUSTOM IN-APP LOGOUT CONFIRMATION MODAL
+=================================================================== -->
+<div id="modal-logout-confirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/70 backdrop-blur-sm hidden">
+  <div class="bg-white border border-gray-200 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-5 text-center">
+    <div class="w-14 h-14 mx-auto rounded-2xl bg-burgundy-subtle border border-burgundy-muted flex items-center justify-center text-burgundy shadow-sm">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+    </div>
+    <div class="space-y-1">
+      <h3 class="text-lg font-black text-gray-900">Sign Out Confirmation</h3>
+      <p id="logout-confirm-text" class="text-xs text-gray-500 leading-relaxed">
+        Are you sure you want to end your current shift session?
+      </p>
+    </div>
+    <div class="grid grid-cols-2 gap-3 pt-2">
+      <button type="button" onclick="closeLogoutModal()" class="py-2.5 px-4 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-bold text-xs transition active:scale-95">
+        Cancel
+      </button>
+      <button type="button" onclick="confirmLogoutAction()" class="py-2.5 px-4 rounded-xl bg-burgundy hover:bg-burgundy-dark text-white font-black text-xs shadow-md shadow-burgundy/20 transition active:scale-95">
+        Yes, Sign Out
+      </button>
+    </div>
   </div>
 </div>
 
